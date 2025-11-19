@@ -1,0 +1,139 @@
+.calendarShell {
+  height: 520px;
+  --calendar-card-padding: 8px;
+  --calendar-card-radius: 5px;
+  --calendar-card-shadow: 0 8px 24px rgba(23, 26, 43, 0.12);
+  --calendar-gutter-width: 52px;
+  --calendar-column-gap: 6px;
+  --calendar-card-border: #000000
+  --calendar-card-fill: #fff;
+  --calendar-card-text: #000;
+}
+
+.calendarShell :global(.rbc-time-view) {
+  border: none;
+  background: #fbfcff;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.calendarShell :global(.rbc-time-header) {
+  border: none;
+  padding: 0 8px;
+}
+
+.calendarShell :global(.rbc-time-header-content) {
+  border-left: none;
+}
+
+.calendarShell :global(.rbc-row-resource) {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6c738c;
+}
+
+.calendarShell :global(.rbc-time-gutter) {
+  width: var(--calendar-gutter-width);
+  padding-right: 4px;
+  border: none;
+  background: #fbfcff;
+}
+
+.calendarShell :global(.rbc-time-gutter .rbc-timeslot-group) {
+  color: #7d859f;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.calendarShell :global(.rbc-time-content) {
+  gap: var(--calendar-column-gap);
+  border-top: 1px solid #edf0fb;
+}
+
+.calendarShell :global(.rbc-time-column) {
+  border: none;
+  padding: 0 4px 0 0;
+}
+
+.calendarShell :global(.rbc-day-slot .rbc-time-slot) {
+  border-top: 1px solid #f0f2fb;
+}
+
+.calendarShell :global(.rbc-day-slot .rbc-time-slot:nth-child(even)) {
+  background: #fefefe;
+}
+
+.calendarShell :global(.rbc-event) {
+  border: none;
+  padding: 0;
+  background: transparent;
+  display: flex;
+}
+
+.calendarShell :global(.rbc-event-content) {
+  width: 100%;
+}
+
+.eventCard {
+  height: 100%;
+  padding: var(--calendar-card-padding);
+  border-radius: var(--calendar-card-radius);
+  border-left: 6px solid var(--calendar-card-border, #000);
+  background: var(--calendar-card-fill, #fff);
+  color: var(--calendar-card-text, #101828);
+  box-shadow: var(--calendar-card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.eventTitle {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.eventTime {
+  font-size: 0.78rem;
+  color: rgba(16, 24, 40, 0.75);
+}
+
+.eventMeta {
+  font-size: 0.72rem;
+  color: rgba(16, 24, 40, 0.8);
+}
+
+.statsCard {
+  opacity: 0.92;
+}
+
+.desktop {
+  padding-right: 6px;
+}
+
+.compact :global(.rbc-time-header .rbc-row.rbc-time-header-cell) {
+  display: none;
+}
+
+.compact :global(.rbc-time-gutter) {
+  width: 40px;
+}
+
+.compact :global(.rbc-time-column) {
+  padding: 0 2px;
+}
+
+.compact :global(.rbc-day-slot .rbc-event) {
+  width: 100%;
+  margin-left: 0;
+}
+
+.compact :global(.rbc-time-content) {
+  gap: 2px;
+}
+
+.compact .eventCard {
+  box-shadow: 0 6px 18px rgba(21, 32, 67, 0.15);
+}
+
+
+

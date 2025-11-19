@@ -5,10 +5,12 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchTopicThunk, saveVoteThunk } from '../store/topicSlice';
 import { setUsername } from '../store/userSlice';
 import UsernameModal from '../components/UsernameModal';
-import VotingCalendar, { USER_RESOURCE_ID, VotingEvent } from '../components/VotingCalendar';
+import VotingCalendar from '../components/VotingCalendar';
 import StatsLadder from '../components/StatsLadder';
 import CalendarControls from '../components/CalendarControls';
 import { StatsInterval, TopicStats } from '../types/topic';
+import { USER_RESOURCE_ID } from '../constants/votingResources';
+import type { VotingEvent } from '../types/calendar';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { VoteSlot, intervalsToSlots, slotsEqual, slotsToIntervals } from '../utils/voteHelpers';
 

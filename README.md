@@ -40,5 +40,6 @@ npm run build
 - `src/services/` — API-обёртки для `/api/v1/topic`.
 - `src/hooks/` и `src/utils/` — вспомогательные хуки и утилиты.
 - `src/assets/` — шрифты, иконки, статические картинки.
+- `docs/calendar-styling.md` — краткое описание палитры и responsive-стратегий календаря.
 
 Поддерживается русскоязычный UI, мобильная верстка, Ant Design + React Big Calendar, а также строгий TypeScript.

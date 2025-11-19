@@ -2,8 +2,15 @@ import React, { useCallback, useMemo } from 'react';
 import { Calendar, SlotInfo } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import { Modal } from 'antd';
+import useMediaQuery from '../hooks/useMediaQuery';
+import { COMPACT_MEDIA_QUERY, getResourceTheme } from '../theme/calendarTokens';
+import { buildResourceList, CalendarRenderEvent, mapEventsToLayout } from '../utils/calendarLayout';
 import calendarLocalizer from '../utils/calendarLocalizer';
 import { createEventId, ensureDuration, normalizeDate } from '../utils/calendarEventHelpers';
+import { USER_RESOURCE_ID } from '../constants/votingResources';
+import type { VotingEvent } from '../types/calendar';
+import VotingCalendarEvent from './VotingCalendarEvent';
+import styles from './VotingCalendar.module.css';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
@@ -17,36 +24,7 @@ const calendarMessages = {
   showMore: (total: number) => `+ ещё ${total}`,
 };
 
-export const VOTING_RESOURCES = [
-  { id: 'stats50', title: '50%' },
-  { id: 'stats70', title: '70%' },
-  { id: 'stats90', title: '90%' },
-  { id: 'user', title: 'Мой выбор' },
-] as const;
-
-export type VotingResource = (typeof VOTING_RESOURCES)[number];
-export type VotingResourceId = VotingResource['id'];
-
-export const USER_RESOURCE_ID: VotingResourceId = 'user';
-export const STATS_RESOURCE_IDS: VotingResourceId[] = ['stats50', 'stats70', 'stats90'];
-
-export interface VotingEvent {
-  id: string;
-  title: string;
-  start: Date;
-  end: Date;
-  resourceId: VotingResourceId;
-  isEditable?: boolean;
-}
-
-const DnDCalendar = withDragAndDrop<VotingEvent>(Calendar as React.ComponentType<any>);
-
-const colorPalette: Record<VotingResourceId, string> = {
-  stats50: '#FFF5E1',
-  stats70: '#FFE8F1',
-  stats90: '#E6F4FF',
-  user: '#D4F5DD',
-};
+const DnDCalendar = withDragAndDrop<CalendarRenderEvent>(Calendar as React.ComponentType<any>);
 
 interface VotingCalendarProps {
   date: Date;
@@ -58,6 +36,12 @@ interface VotingCalendarProps {
 
 const VotingCalendar: React.FC<VotingCalendarProps> = ({ date, statsEvents, userEvents, onUserEventsChange, onDateChange }) => {
   const events = useMemo(() => [...statsEvents, ...userEvents], [statsEvents, userEvents]);
+  const isCompact = useMediaQuery(COMPACT_MEDIA_QUERY);
+  const layoutResources = useMemo(() => buildResourceList(isCompact), [isCompact]);
+  const renderEvents = useMemo(
+    () => mapEventsToLayout(events, isCompact),
+    [events, isCompact]
+  );
 
   const scrollToTime = useMemo(() => {
     const anchor = new Date(date);
@@ -135,46 +119,58 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({ date, statsEvents, user
     [onUserEventsChange, userEvents]
   );
 
-  const eventPropGetter = useCallback(
-    (event: VotingEvent) => ({
+  const eventPropGetter = useCallback((event: CalendarRenderEvent) => {
+    const theme = getResourceTheme(event.resourceId);
+    return {
       style: {
-        backgroundColor: colorPalette[event.resourceId],
-        color: '#1F1F1F',
-        opacity: event.resourceId === USER_RESOURCE_ID ? 1 : 0.8,
+        '--calendar-card-border': theme.border,
+        '--calendar-card-fill': theme.fill,
+        '--calendar-card-text': theme.text,
         cursor: event.resourceId === USER_RESOURCE_ID ? 'move' : 'default',
-      },
-    }),
-    []
-  );
+      } as React.CSSProperties,
+    };
+  }, []);
+
+  const calendarComponents = useMemo(() => ({ event: VotingCalendarEvent }), []);
+
+  const shellClassName = [
+    styles.calendarShell,
+    isCompact ? styles.compact : styles.desktop,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <DnDCalendar
-      culture="ru"
-      date={date}
-      events={events}
-      localizer={calendarLocalizer}
-      messages={calendarMessages}
-      defaultView="day"
-      views={{ day: true }}
-      toolbar={false}
-      selectable
-      resizable
-      step={30}
-      timeslots={2}
-      scrollToTime={scrollToTime}
-      resources={VOTING_RESOURCES}
-      resourceIdAccessor="id"
-      resourceTitleAccessor="title"
-      onNavigate={onDateChange}
-      onSelectSlot={handleSelectSlot}
-      onEventDrop={handleEventDrop}
-      onEventResize={handleEventResize}
-      onSelectEvent={handleSelectEvent}
-      draggableAccessor={(event) => Boolean(event.isEditable)}
-      resizableAccessor={(event) => Boolean(event.isEditable)}
-      eventPropGetter={eventPropGetter}
-      style={{ height: 520 }}
-    />
+    <div className={shellClassName}>
+      <DnDCalendar
+        culture="ru"
+        date={date}
+        events={renderEvents}
+        localizer={calendarLocalizer}
+        messages={calendarMessages}
+        defaultView="day"
+        views={{ day: true }}
+        toolbar={false}
+        selectable
+        resizable
+        step={30}
+        timeslots={2}
+        scrollToTime={scrollToTime}
+        resources={layoutResources}
+        resourceIdAccessor="id"
+        resourceTitleAccessor="title"
+        onNavigate={onDateChange}
+        onSelectSlot={handleSelectSlot}
+        onEventDrop={handleEventDrop}
+        onEventResize={handleEventResize}
+        onSelectEvent={handleSelectEvent}
+        draggableAccessor={(event) => Boolean(event.isEditable)}
+        resizableAccessor={(event) => Boolean(event.isEditable)}
+        eventPropGetter={eventPropGetter}
+        components={calendarComponents}
+        style={{ height: '100%' }}
+      />
+    </div>
   );
 };
 
