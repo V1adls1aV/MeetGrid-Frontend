@@ -7,6 +7,7 @@ import { setUsername } from '../store/userSlice';
 import UsernameModal from '../components/UsernameModal';
 import VotingCalendar, { USER_RESOURCE_ID, VotingEvent } from '../components/VotingCalendar';
 import StatsLadder from '../components/StatsLadder';
+import CalendarControls from '../components/CalendarControls';
 import { StatsInterval, TopicStats } from '../types/topic';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { VoteSlot, intervalsToSlots, slotsEqual, slotsToIntervals } from '../utils/voteHelpers';
@@ -174,16 +175,19 @@ const TopicMainPage: React.FC = () => {
 
   return (
     <section style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <header style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <Title level={2} style={{ marginBottom: 0 }}>
-          Выбор времени
-        </Title>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <Button type="link" onClick={refresh} disabled={!username || !topicId}>
-            Обновить данные
-          </Button>
-          <Text type="secondary">Колонки: 50% • 70% • 90% • Мой выбор</Text>
+      <header style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <Title level={2} style={{ marginBottom: 0 }}>
+            Выбор времени
+          </Title>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <Button type="link" onClick={refresh} disabled={!username || !topicId}>
+              Обновить данные
+            </Button>
+            <Text type="secondary">Колонки: 50% • 70% • 90% • Мой выбор</Text>
+          </div>
         </div>
+        <CalendarControls date={currentDate} onChange={setCurrentDate} />
       </header>
 
       {loading && (

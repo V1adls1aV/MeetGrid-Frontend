@@ -156,7 +156,7 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({ date, statsEvents, user
       messages={calendarMessages}
       defaultView="day"
       views={{ day: true }}
-      toolbar
+      toolbar={false}
       selectable
       resizable
       step={30}

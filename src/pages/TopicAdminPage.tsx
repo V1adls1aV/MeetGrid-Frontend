@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import dayjs from 'dayjs';
 import { useParams } from 'react-router-dom';
-import { Alert, Button, DatePicker, Typography } from 'antd';
+import { Alert, Button, Typography } from 'antd';
 import StatsLadder from '../components/StatsLadder';
 import ConstraintsCalendar, { ConstraintEvent } from '../components/ConstraintsCalendar';
+import CalendarControls from '../components/CalendarControls';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchTopicThunk, updateConstraintsThunk } from '../store/topicSlice';
 import { Interval } from '../types/topic';
@@ -104,10 +104,6 @@ const TopicAdminPage: React.FC = () => {
     setLocalConstraints(sorted.map(eventToInterval));
   }, []);
 
-  const handleDateChange = useCallback((value: dayjs.Dayjs | null) => {
-    setCurrentDate(value ? value.toDate() : new Date());
-  }, []);
-
   const handleSave = useCallback(() => {
     if (!topicId || !username) {
       return;
@@ -150,7 +146,7 @@ const TopicAdminPage: React.FC = () => {
             </Paragraph>
           )}
         </div>
-        <DatePicker value={dayjs(currentDate)} onChange={handleDateChange} allowClear={false} placeholder="Дата" />
+        <CalendarControls date={currentDate} onChange={setCurrentDate} />
       </header>
 
       {error && <Alert message="Ошибка" description={error} type="error" showIcon />}
