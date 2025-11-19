@@ -1,0 +1,6 @@
+/* Purpose: базовые глобальные стили, подключаемые по умолчанию. */
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #f5f5f5;
+}
