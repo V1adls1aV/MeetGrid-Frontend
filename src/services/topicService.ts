@@ -1,15 +1,75 @@
-// Purpose: обёртки над HTTP-запросами к /api/v1/topic.
-import axios from 'axios';
+import { getApiUrl } from '../config/apiConfig';
+import {
+  CreatedTopic,
+  TopicResponse,
+  TopicCreatePayload,
+  VotePayload,
+  ConstraintsPayload,
+} from '../types/topic';
 
-const client = axios.create({ baseURL: '/api/v1/topic' });
+const appendQuery = (path: string, params?: Record<string, string | undefined>) => {
+  if (!params) {
+    return path;
+  }
 
-export const fetchTopic = (topicId: string, username?: string) =>
-  client.get(`/${topicId}`, { params: username ? { username } : undefined });
+  const entries = Object.entries(params).filter(([, value]) => value);
+  if (!entries.length) {
+    return path;
+  }
 
-export const createTopic = (payload: Record<string, unknown>) => client.post('/', payload);
+  const payload = entries.reduce<Record<string, string>>((acc, [key, value]) => {
+    acc[key] = value as string;
+    return acc;
+  }, {});
+  const joined = new URLSearchParams(payload).toString();
+  return `${path}?${joined}`;
+};
 
-export const saveVote = (topicId: string, username: string, intervals: unknown[]) =>
-  client.put(`/${topicId}/pick`, { intervals }, { params: { username } });
+const requestJson = async <T>(path: string, options: RequestInit = {}) => {
+  const response = await fetch(getApiUrl(path), {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers ?? {}),
+    },
+  });
 
-export const updateConstraints = (topicId: string, username: string, constraints: unknown[]) =>
-  client.put(`/${topicId}/constraints`, { constraints }, { params: { username } });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || response.statusText);
+  }
+
+  return response.json() as Promise<T>;
+};
+
+export const createTopic = async (
+  payload: TopicCreatePayload,
+  username: string
+): Promise<CreatedTopic> =>
+  requestJson<CreatedTopic>(appendQuery('/', { username }), {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+export const fetchTopic = async (topicId: string, username?: string): Promise<TopicResponse> =>
+  requestJson<TopicResponse>(appendQuery(`/${topicId}`, { username }));
+
+export const saveVote = async (
+  topicId: string,
+  username: string,
+  payload: VotePayload
+): Promise<TopicResponse> =>
+  requestJson<TopicResponse>(appendQuery(`/${topicId}/pick`, { username }), {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+
+export const updateConstraints = async (
+  topicId: string,
+  username: string,
+  payload: ConstraintsPayload
+): Promise<TopicResponse> =>
+  requestJson<TopicResponse>(appendQuery(`/${topicId}/constraints`, { username }), {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });

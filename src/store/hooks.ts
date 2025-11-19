@@ -1,4 +1,3 @@
-// Purpose: типизированные хелперы для dispatch/select в Redux.
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from './store';
 

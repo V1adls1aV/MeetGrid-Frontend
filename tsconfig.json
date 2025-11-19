@@ -1,4 +1,3 @@
-/* Purpose: configure TypeScript compiler for the SPA */
 {
   "compilerOptions": {
     "target": "ESNext",

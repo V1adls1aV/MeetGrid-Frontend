@@ -1,4 +1,3 @@
-// Purpose: маршрутизирует основные страницы SPA.
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import LandingPage from '../pages/LandingPage';

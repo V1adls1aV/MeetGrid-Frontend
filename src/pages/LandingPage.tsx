@@ -1,4 +1,3 @@
-// Purpose: содержит начальный экран с описанием проекта и переходом к созданию опроса.
 import React from 'react';
 import { Button } from 'antd';
 import { Link } from 'react-router-dom';

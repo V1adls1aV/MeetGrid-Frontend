@@ -1,4 +1,3 @@
-// Purpose: сохраняет и читает строку в localStorage без выбросов исключений.
 import { useEffect, useState } from 'react';
 
 const safeRead = (key: string) => {

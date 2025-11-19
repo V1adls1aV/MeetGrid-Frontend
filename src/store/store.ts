@@ -1,4 +1,3 @@
-// Purpose: объединяет Redux-слайсы и экспортирует хранилище.
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './userSlice';
 import topicReducer from './topicSlice';

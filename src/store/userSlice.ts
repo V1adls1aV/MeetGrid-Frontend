@@ -1,4 +1,3 @@
-// Purpose: хранит имя пользователя для повторного доступа к опросу.
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface UserState {
