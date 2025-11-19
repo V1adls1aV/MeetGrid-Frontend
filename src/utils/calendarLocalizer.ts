@@ -1,4 +1,3 @@
-// Purpose: предоставляет общий локализатор календаря с поддержкой русского языка.
 import { dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import ru from 'date-fns/locale/ru';

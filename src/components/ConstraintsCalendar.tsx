@@ -1,9 +1,9 @@
-// Purpose: интерактивный календарь ограничений с поддержкой drag&drop.
 import React, { useCallback, useMemo } from 'react';
 import { Calendar } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import { Modal } from 'antd';
 import calendarLocalizer from '../utils/calendarLocalizer';
+import { createEventId, ensureDuration, normalizeDate } from '../utils/calendarEventHelpers';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
@@ -33,7 +33,6 @@ interface SlotPayload {
   end: Date | string;
 }
 
-const SLOT_MINUTES = 15;
 const DEFAULT_TITLE = 'Окно';
 const DnDCalendar = withDragAndDrop<ConstraintEvent>(Calendar as React.ComponentType<any>);
 
@@ -45,26 +44,6 @@ const calendarMessages = {
   noEventsInRange: 'Нет доступных слотов',
   showMore: (total: number) => `+ ещё ${total}`,
 };
-
-/**
- * Generates deterministic ids so drag handlers can keep reference to events.
- */
-const createEventId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-/**
- * Guarantees that a new slot always spans at least SLOT_MINUTES.
- */
-const ensureDuration = (start: Date, end: Date) => {
-  if (end <= start) {
-    return new Date(start.getTime() + SLOT_MINUTES * 60 * 1000);
-  }
-  return end;
-};
-
-/**
- * Normalizes any Date-like input to an actual Date instance.
- */
-const normalizeDate = (value: Date | string) => (value instanceof Date ? value : new Date(value));
 
 const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({ date, events, onEventsChange }) => {
   const scrollToTime = useMemo(() => {

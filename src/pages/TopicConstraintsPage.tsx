@@ -1,4 +1,3 @@
-// Purpose: позволяет админу добавить интервалы ограничений перед созданием темы.
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
