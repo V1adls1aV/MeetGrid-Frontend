@@ -10,21 +10,25 @@
     "cypress:open": "cypress open"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "latest",
     "antd": "latest",
     "axios": "latest",
     "date-fns": "latest",
+    "dayjs": "latest",
     "react": "latest",
     "react-big-calendar": "latest",
     "react-dom": "latest",
     "react-redux": "latest",
-    "react-router-dom": "latest",
-    "@reduxjs/toolkit": "latest"
+    "react-router-dom": "latest"
   },
   "devDependencies": {
+    "@jest/test-sequencer": "^30.2.0",
     "@types/jest": "latest",
     "@types/react": "latest",
+    "@types/react-big-calendar": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
+    "cypress": "latest",
     "eslint": "latest",
     "eslint-config-prettier": "latest",
     "eslint-plugin-prettier": "latest",
@@ -33,7 +37,6 @@
     "jest": "latest",
     "ts-jest": "latest",
     "typescript": "latest",
-    "vite": "latest",
-    "cypress": "latest"
+    "vite": "latest"
   }
 }

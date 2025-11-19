@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CreatedTopic, TopicCreatePayload, TopicResponse, VotePayload, ConstraintsPayload } from '../types/topic';
 import {
   createTopic as createTopicRequest,
@@ -7,18 +7,34 @@ import {
   updateConstraints as updateConstraintsRequest,
 } from '../services/topicService';
 
-interface TopicState {
+interface TopicFormDraft {
+  topicName: string;
+  adminName: string;
+  description: string;
+}
+
+export interface TopicState {
   topic: TopicResponse['topic'] | null;
   stats: TopicResponse['stats'] | null;
   inviteLink: string | null;
+  draftConstraints: TopicCreatePayload['constraints'];
+  draftForm: TopicFormDraft;
   loading: boolean;
   error: string | null;
 }
+
+const buildEmptyDraftForm = (): TopicFormDraft => ({
+  topicName: '',
+  adminName: '',
+  description: '',
+});
 
 const initialState: TopicState = {
   topic: null,
   stats: null,
   inviteLink: null,
+  draftConstraints: [],
+  draftForm: buildEmptyDraftForm(),
   loading: false,
   error: null,
 };
@@ -74,7 +90,20 @@ export const updateConstraintsThunk = createAsyncThunk<
 const topicSlice = createSlice({
   name: 'topic',
   initialState,
-  reducers: {},
+  reducers: {
+    setDraftConstraints(state, action: { payload: TopicCreatePayload['constraints'] }) {
+      state.draftConstraints = action.payload;
+    },
+    resetDraftConstraints(state) {
+      state.draftConstraints = [];
+    },
+    setDraftForm(state, action: PayloadAction<Partial<TopicFormDraft>>) {
+      state.draftForm = { ...state.draftForm, ...action.payload };
+    },
+    resetDraftForm(state) {
+      state.draftForm = buildEmptyDraftForm();
+    },
+  },
   extraReducers: (builder) =>
     builder
       .addCase(createTopicThunk.pending, (state) => {
@@ -83,6 +112,8 @@ const topicSlice = createSlice({
       })
       .addCase(createTopicThunk.fulfilled, (state, action) => {
         state.inviteLink = action.payload.invite_link;
+        state.draftConstraints = [];
+        state.draftForm = buildEmptyDraftForm();
         state.loading = false;
       })
       .addCase(createTopicThunk.rejected, (state, action) => {
@@ -130,4 +161,5 @@ const topicSlice = createSlice({
       }),
 });
 
+export const { setDraftConstraints, resetDraftConstraints, setDraftForm, resetDraftForm } = topicSlice.actions;
 export default topicSlice.reducer;

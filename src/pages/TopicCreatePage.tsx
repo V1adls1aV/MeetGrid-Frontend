@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Alert, Typography } from 'antd';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { createTopicThunk } from '../store/topicSlice';
+import { createTopicThunk, setDraftForm } from '../store/topicSlice';
+import { setUsername } from '../store/userSlice';
 
-const { Paragraph } = Typography;
+const { Paragraph, Text } = Typography;
 
 interface FormValues {
   topicName: string;
@@ -13,8 +15,13 @@ interface FormValues {
 
 const TopicCreatePage: React.FC = () => {
   const [form] = Form.useForm<FormValues>();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { loading, error, inviteLink } = useAppSelector((state) => state.topic);
+  const { loading, error, inviteLink, draftConstraints, draftForm } = useAppSelector((state) => state.topic);
+
+  useEffect(() => {
+    form.setFieldsValue(draftForm);
+  }, [draftForm, form]);
 
   const handleFinish = (values: FormValues) => {
     dispatch(
@@ -23,16 +30,51 @@ const TopicCreatePage: React.FC = () => {
         payload: {
           topic_name: values.topicName.trim(),
           description: values.description?.trim() ?? null,
-          constraints: [],
+          constraints: draftConstraints,
         },
       })
     );
   };
 
+  const handleValuesChange = (_: Partial<FormValues>, allValues: FormValues) => {
+    dispatch(
+      setDraftForm({
+        topicName: allValues.topicName ?? '',
+        adminName: allValues.adminName ?? '',
+        description: allValues.description ?? '',
+      })
+    );
+  };
+
+  const handleOpenConstraints = () => {
+    navigate('/topic/new/constraints');
+  };
+
+  const handleGoToPoll = () => {
+    if (!inviteLink) {
+      return;
+    }
+
+    const rawName = form.getFieldValue('adminName');
+    const trimmedName = typeof rawName === 'string' ? rawName.trim() : '';
+    if (!trimmedName) {
+      return;
+    }
+
+    try {
+      localStorage.setItem('meetgrid-username', trimmedName);
+    } catch {
+      // ignore storage errors for browsers without permission
+    }
+
+    dispatch(setUsername(trimmedName));
+    window.location.href = inviteLink;
+  };
+
   return (
     <section style={{ padding: '2rem', maxWidth: 540 }}>
       <Typography.Title level={2}>Создать опрос</Typography.Title>
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
+      <Form form={form} layout="vertical" onFinish={handleFinish} onValuesChange={handleValuesChange} initialValues={draftForm}>
         <Form.Item
           name="topicName"
           label="Название"
@@ -50,8 +92,13 @@ const TopicCreatePage: React.FC = () => {
         <Form.Item name="description" label="Описание">
           <Input.TextArea rows={3} placeholder="Цель встречи" />
         </Form.Item>
-        <Form.Item label="Ограничения (пока placeholder)">
-          <Input placeholder="Добавим редактор позже" disabled />
+        <Form.Item label="Ограничения">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <Button onClick={handleOpenConstraints}>Выбрать ограничения</Button>
+            <Text type={draftConstraints.length ? 'success' : 'secondary'}>
+              {draftConstraints.length ? `${draftConstraints.length} слотов выбрано` : 'Слоты пока не выбраны'}
+            </Text>
+          </div>
         </Form.Item>
         {error && (
           <Form.Item>
@@ -65,9 +112,14 @@ const TopicCreatePage: React.FC = () => {
         </Form.Item>
       </Form>
       {inviteLink && (
-        <Paragraph copyable={{ text: inviteLink }}>
-          Ссылка для участников: <a href={inviteLink}>{inviteLink}</a>
-        </Paragraph>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <Paragraph copyable={{ text: inviteLink }} style={{ marginBottom: 0 }}>
+            Ссылка для участников: <a href={inviteLink}>{inviteLink}</a>
+          </Paragraph>
+          <Button type="default" onClick={handleGoToPoll}>
+            Перейти к голосованию
+          </Button>
+        </div>
       )}
     </section>
   );
