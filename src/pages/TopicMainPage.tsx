@@ -235,6 +235,7 @@ const TopicMainPage: React.FC = () => {
         userEvents={userEvents}
         onUserEventsChange={handleUserEventsChange}
         onDateChange={setCurrentDate}
+        constraints={topic?.constraints ?? []}
       />
 
       <div>

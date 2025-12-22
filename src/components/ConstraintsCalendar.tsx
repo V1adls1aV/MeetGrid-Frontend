@@ -4,6 +4,7 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import { Modal } from 'antd';
 import calendarLocalizer from '../utils/calendarLocalizer';
 import { createEventId, ensureDuration, normalizeDate } from '../utils/calendarEventHelpers';
+import { hasOverlap, showValidationWarning } from '../utils/intervalGuards';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
@@ -67,6 +68,12 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({ date, events,
 
       const start = normalizeDate(slot.start);
       const end = ensureDuration(start, normalizeDate(slot.end));
+      const candidate = { start, end };
+
+      if (hasOverlap(events, candidate)) {
+        showValidationWarning('Можно выбрать только непересекающиеся интервалы.');
+        return;
+      }
 
       onEventsChange([
         ...events,
@@ -82,17 +89,31 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({ date, events,
   );
 
   const handleEventDrop = useCallback(
-    ({ event, start, end }: DragEventArgs) => {
+    ({ event, start, end }: any) => {
+      const candidate = { id: event.id, start, end };
+
+      if (hasOverlap(events, candidate)) {
+        showValidationWarning('Можно выбрать только непересекающиеся интервалы.');
+        return;
+      }
+
       updateEvent(event.id, { start, end });
     },
-    [updateEvent]
+    [events, updateEvent]
   );
 
   const handleEventResize = useCallback(
-    ({ event, start, end }: DragEventArgs) => {
+    ({ event, start, end }: any) => {
+      const candidate = { id: event.id, start, end };
+
+      if (hasOverlap(events, candidate)) {
+        showValidationWarning('Можно выбрать только непересекающиеся интервалы.');
+        return;
+      }
+
       updateEvent(event.id, { start, end });
     },
-    [updateEvent]
+    [events, updateEvent]
   );
 
   const handleSelectEvent = useCallback(

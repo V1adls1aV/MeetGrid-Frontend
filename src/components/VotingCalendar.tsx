@@ -7,8 +7,11 @@ import { COMPACT_MEDIA_QUERY, getResourceTheme } from '../theme/calendarTokens';
 import { buildResourceList, CalendarRenderEvent, mapEventsToLayout } from '../utils/calendarLayout';
 import calendarLocalizer from '../utils/calendarLocalizer';
 import { createEventId, ensureDuration, normalizeDate } from '../utils/calendarEventHelpers';
+import { hasOverlap, fitsConstraints, showValidationWarning } from '../utils/intervalGuards';
+import { getBlockedIntervals, generateBackgroundEvents } from '../utils/calendarBackgroundEvents';
 import { USER_RESOURCE_ID } from '../constants/votingResources';
 import type { VotingEvent } from '../types/calendar';
+import type { Interval } from '../types/topic';
 import VotingCalendarEvent from './VotingCalendarEvent';
 import styles from './VotingCalendar.module.css';
 
@@ -32,15 +35,34 @@ interface VotingCalendarProps {
   userEvents: VotingEvent[];
   onUserEventsChange: (next: VotingEvent[]) => void;
   onDateChange: (next: Date) => void;
+  constraints?: Interval[];
 }
 
-const VotingCalendar: React.FC<VotingCalendarProps> = ({ date, statsEvents, userEvents, onUserEventsChange, onDateChange }) => {
+const VotingCalendar: React.FC<VotingCalendarProps> = ({
+  date,
+  statsEvents,
+  userEvents,
+  onUserEventsChange,
+  onDateChange,
+  constraints = [],
+}) => {
   const events = useMemo(() => [...statsEvents, ...userEvents], [statsEvents, userEvents]);
   const isCompact = useMediaQuery(COMPACT_MEDIA_QUERY);
   const layoutResources = useMemo(() => buildResourceList(isCompact), [isCompact]);
   const renderEvents = useMemo(
     () => mapEventsToLayout(events, isCompact),
     [events, isCompact]
+  );
+
+  const backgroundEvents = useMemo(() => {
+    const blocked = getBlockedIntervals(date, constraints);
+    const resourceIds = layoutResources.map((r) => r.id);
+    return generateBackgroundEvents(blocked, resourceIds) as unknown as CalendarRenderEvent[];
+  }, [date, constraints, layoutResources]);
+
+  const userTimedEvents = useMemo(
+    () => userEvents.map(({ id, start, end }) => ({ id, start, end })),
+    [userEvents]
   );
 
   const scrollToTime = useMemo(() => {
@@ -64,11 +86,24 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({ date, statsEvents, user
 
       const start = normalizeDate(slot.start as Date | string);
       const end = ensureDuration(start, normalizeDate(slot.end as Date | string));
+      const candidate = { start, end };
+
+      if (hasOverlap(userTimedEvents, candidate)) {
+        showValidationWarning('Можно выбрать только непересекающиеся интервалы.');
+        return;
+      }
+
+      if (!fitsConstraints(candidate, constraints)) {
+        showValidationWarning('Интервал должен полностью лежать в доступных окнах.');
+        return;
+      }
+
+      const id = createEventId();
 
       onUserEventsChange([
         ...userEvents,
         {
-          id: createEventId(),
+          id,
           title: 'Доступен',
           start,
           end,
@@ -77,33 +112,59 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({ date, statsEvents, user
         },
       ]);
     },
-    [onUserEventsChange, userEvents]
+    [constraints, onUserEventsChange, userEvents, userTimedEvents]
   );
 
   const handleEventDrop = useCallback(
-    ({ event, start, end }: { event: VotingEvent; start: Date; end: Date }) => {
+    ({ event, start, end }: any) => {
       if (event.resourceId !== USER_RESOURCE_ID) {
+        return;
+      }
+
+      const candidate = { id: event.id, start, end };
+
+      if (hasOverlap(userTimedEvents, candidate)) {
+        showValidationWarning('Можно выбрать только непересекающиеся интервалы.');
+        return;
+      }
+
+      if (!fitsConstraints(candidate, constraints)) {
+        showValidationWarning('Интервал должен полностью лежать в доступных окнах.');
         return;
       }
 
       updateUserEvent(event.id, { start, end });
     },
-    [updateUserEvent]
+    [constraints, updateUserEvent, userTimedEvents]
   );
 
   const handleEventResize = useCallback(
-    ({ event, start, end }: { event: VotingEvent; start: Date; end: Date }) => {
+    ({ event, start, end }: any) => {
       if (event.resourceId !== USER_RESOURCE_ID) {
+        return;
+      }
+
+      const candidate = { id: event.id, start, end };
+
+      if (hasOverlap(userTimedEvents, candidate)) {
+        showValidationWarning('Можно выбрать только непересекающиеся интервалы.');
+        return;
+      }
+
+      if (!fitsConstraints(candidate, constraints)) {
+        showValidationWarning('Интервал должен полностью лежать в доступных окнах.');
         return;
       }
 
       updateUserEvent(event.id, { start, end });
     },
-    [updateUserEvent]
+    [constraints, updateUserEvent, userTimedEvents]
   );
 
   const handleSelectEvent = useCallback(
-    (event: VotingEvent) => {
+    (event: any) => {
+      if (event.isBackground) return;
+
       if (event.resourceId !== USER_RESOURCE_ID) {
         return;
       }
@@ -119,7 +180,18 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({ date, statsEvents, user
     [onUserEventsChange, userEvents]
   );
 
-  const eventPropGetter = useCallback((event: CalendarRenderEvent) => {
+  const eventPropGetter = useCallback((event: any) => {
+    if (event.isBackground) {
+      return {
+        style: {
+          backgroundColor: 'rgba(120, 120, 120, 0.18)',
+          borderRadius: 12,
+          border: 'none',
+          pointerEvents: 'none', // Ensure it doesn't INTERCEPT clicks, though RBC handles this
+        } as React.CSSProperties,
+      };
+    }
+
     const theme = getResourceTheme(event.resourceId);
     return {
       style: {
@@ -146,6 +218,7 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({ date, statsEvents, user
         culture="ru"
         date={date}
         events={renderEvents}
+        backgroundEvents={backgroundEvents}
         localizer={calendarLocalizer}
         messages={calendarMessages}
         defaultView="day"
@@ -157,8 +230,8 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({ date, statsEvents, user
         timeslots={2}
         scrollToTime={scrollToTime}
         resources={layoutResources}
-        resourceIdAccessor="id"
-        resourceTitleAccessor="title"
+        resourceIdAccessor={(resource: any) => resource.id}
+        resourceTitleAccessor={(resource: any) => resource.title}
         onNavigate={onDateChange}
         onSelectSlot={handleSelectSlot}
         onEventDrop={handleEventDrop}
@@ -175,5 +248,3 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({ date, statsEvents, user
 };
 
 export default VotingCalendar;
-
-
