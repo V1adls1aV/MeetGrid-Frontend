@@ -50,27 +50,6 @@ const TopicCreatePage: React.FC = () => {
     navigate('/topic/new/constraints');
   };
 
-  const handleGoToPoll = () => {
-    if (!inviteLink) {
-      return;
-    }
-
-    const rawName = form.getFieldValue('adminName');
-    const trimmedName = typeof rawName === 'string' ? rawName.trim() : '';
-    if (!trimmedName) {
-      return;
-    }
-
-    try {
-      localStorage.setItem('meetgrid-username', trimmedName);
-    } catch {
-      // ignore storage errors for browsers without permission
-    }
-
-    dispatch(setUsername(trimmedName));
-    window.location.href = inviteLink;
-  };
-
   return (
     <section style={{ padding: '2rem', maxWidth: 540 }}>
       <Typography.Title level={2}>Создать опрос</Typography.Title>
@@ -116,9 +95,6 @@ const TopicCreatePage: React.FC = () => {
           <Paragraph copyable={{ text: inviteLink }} style={{ marginBottom: 0 }}>
             Ссылка для участников: <a href={inviteLink}>{inviteLink}</a>
           </Paragraph>
-          <Button type="default" onClick={handleGoToPoll}>
-            Перейти к голосованию
-          </Button>
         </div>
       )}
     </section>

@@ -6,6 +6,7 @@ export default defineConfig({
     viewportWidth: 390,
     viewportHeight: 844,
     video: false,
+    supportFile: false,
     setupNodeEvents() {
       // no-op
     },

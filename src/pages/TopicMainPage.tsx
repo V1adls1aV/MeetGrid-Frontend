@@ -78,6 +78,12 @@ const TopicMainPage: React.FC = () => {
   const [userSlots, setUserSlots] = useState<VoteSlot[]>([]);
   const [initialSlots, setInitialSlots] = useState<VoteSlot[]>([]);
   const initialDateApplied = useRef(false);
+  const dataLoadedRef = useRef(false);
+
+  // Reset data loaded flag when context changes
+  useEffect(() => {
+    dataLoadedRef.current = false;
+  }, [topicId, username]);
 
   useEffect(() => {
     if (storedName && storedName !== username) {
@@ -100,22 +106,29 @@ const TopicMainPage: React.FC = () => {
 
     const intervals = topic?.votes?.[username] ?? [];
     const slots = intervalsToSlots(intervals);
-    setUserSlots(slots);
+
+    // Always update baseline to detect changes against server state
     setInitialSlots(slots);
+
+    // Only update user slots on initial load to avoid overwriting ongoing edits
+    if (!dataLoadedRef.current) {
+      setUserSlots(slots);
+      dataLoadedRef.current = true;
+    }
   }, [topic?.votes, username]);
 
   useEffect(() => {
     if (initialDateApplied.current) {
       return;
     }
-    const earliest = findEarliestStatStart(stats);
+    const earliest = findEarliestStatStart(stats ?? undefined);
     if (earliest) {
       setCurrentDate(earliest);
       initialDateApplied.current = true;
     }
   }, [stats]);
 
-  const statsEvents = useMemo(() => statsToEvents(stats), [stats]);
+  const statsEvents = useMemo(() => statsToEvents(stats ?? undefined), [stats]);
   const userEvents = useMemo(() => userSlots.map(slotToEvent), [userSlots]);
   const ladderBlocks = useMemo(() => {
     if (!stats) {
@@ -166,14 +179,30 @@ const TopicMainPage: React.FC = () => {
     [dispatch, setStoredName]
   );
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
     if (topicId && username) {
-      dispatch(fetchTopicThunk({ topicId, username }));
+      const action = await dispatch(fetchTopicThunk({ topicId, username }));
+      if (fetchTopicThunk.fulfilled.match(action)) {
+        const intervals = action.payload.topic.votes?.[username] ?? [];
+        setUserSlots(intervalsToSlots(intervals));
+      }
     }
   }, [dispatch, topicId, username]);
 
   const hasChanges = useMemo(() => !slotsEqual(userSlots, initialSlots), [initialSlots, userSlots]);
-  const canSave = Boolean(topicId && username && hasChanges && !loading);
+
+  // Auto-save effect
+  useEffect(() => {
+    if (!topicId || !username || !hasChanges) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      handleSave();
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [userSlots, hasChanges, topicId, username, handleSave]);
 
   return (
     <section style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -207,15 +236,6 @@ const TopicMainPage: React.FC = () => {
         onUserEventsChange={handleUserEventsChange}
         onDateChange={setCurrentDate}
       />
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-        <Button onClick={() => setUserSlots(initialSlots)} disabled={!hasChanges}>
-          Сбросить
-        </Button>
-        <Button type="primary" onClick={handleSave} disabled={!canSave} loading={loading}>
-          Сохранить выбор
-        </Button>
-      </div>
 
       <div>
         <Paragraph style={{ marginBottom: '0.5rem' }}>Лучшие окна по статистике:</Paragraph>
