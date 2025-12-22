@@ -9,12 +9,10 @@ const timeFormatter = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute
 const formatRange = (start: Date, end: Date) => `${timeFormatter.format(start)} — ${timeFormatter.format(end)}`;
 
 const VotingCalendarEvent: React.FC<EventProps<CalendarRenderEvent>> = ({ event }) => {
-  const isUserSlot = event.resourceId === USER_RESOURCE_ID;
   const timeRange = useMemo(() => formatRange(event.start, event.end), [event.end, event.start]);
-  const cardClassName = [styles.eventCard, isUserSlot ? styles.userCard : styles.statsCard].filter(Boolean).join(' ');
 
   return (
-    <div className={cardClassName}>
+    <div className={styles.eventContent}>
       <span className={styles.eventTime}>{timeRange}</span>
       <span className={styles.eventTitle}>{event.title}</span>
     </div>

@@ -8,8 +8,8 @@ import { buildResourceList, CalendarRenderEvent, mapEventsToLayout } from '../ut
 import calendarLocalizer from '../utils/calendarLocalizer';
 import { createEventId, ensureDuration, normalizeDate } from '../utils/calendarEventHelpers';
 import { hasOverlap, fitsConstraints, showValidationWarning } from '../utils/intervalGuards';
-import { getBlockedIntervals, generateBackgroundEvents } from '../utils/calendarBackgroundEvents';
-import { USER_RESOURCE_ID } from '../constants/votingResources';
+import { getBlockedIntervals, generateBackgroundEvents, VisualPosition } from '../utils/calendarBackgroundEvents';
+import { USER_RESOURCE_ID, setDayStart, setDayEnd } from '../constants/votingResources';
 import type { VotingEvent } from '../types/calendar';
 import type { Interval } from '../types/topic';
 import VotingCalendarEvent from './VotingCalendarEvent';
@@ -182,24 +182,52 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
 
   const eventPropGetter = useCallback((event: any) => {
     if (event.isBackground) {
+      const position = event.visualPosition as VisualPosition;
+      const radius = 20;
+
+      // Ensure that event start/end match day boundaries to avoid rounding at the very top/bottom
+      const dayStart = setDayStart(event.start);
+      const dayEnd = setDayEnd(event.end);
+      const isTouchingTop = event.start.getTime() <= dayStart.getTime();
+      const isTouchingBottom = event.end.getTime() >= dayEnd.getTime();
+
+      const style: React.CSSProperties = {
+        backgroundColor: 'rgba(120, 120, 120, 0.4)',
+        border: 'none',
+        borderRadius: 0,
+        pointerEvents: 'none',
+      };
+      
+      const topLeft = !isTouchingTop && (position === 'start' || position === 'single') ? radius : 0;
+      const bottomLeft = !isTouchingBottom && (position === 'start' || position === 'single') ? radius : 0;
+      const topRight = !isTouchingTop && (position === 'end' || position === 'single') ? radius : 0;
+      const bottomRight = !isTouchingBottom && (position === 'end' || position === 'single') ? radius : 0;
+
+      if (topLeft) style.borderTopLeftRadius = topLeft;
+      if (bottomLeft) style.borderBottomLeftRadius = bottomLeft;
+      if (topRight) style.borderTopRightRadius = topRight;
+      if (bottomRight) style.borderBottomRightRadius = bottomRight;
+      
       return {
-        style: {
-          backgroundColor: 'rgba(120, 120, 120, 0.18)',
-          borderRadius: 12,
-          border: 'none',
-          pointerEvents: 'none', // Ensure it doesn't INTERCEPT clicks, though RBC handles this
-        } as React.CSSProperties,
+        style,
+        className: styles.backgroundEvent,
       };
     }
 
     const theme = getResourceTheme(event.resourceId);
+    const isUserEvent = event.resourceId === USER_RESOURCE_ID;
+    
     return {
       style: {
         '--calendar-card-border': theme.border,
         '--calendar-card-fill': theme.fill,
         '--calendar-card-text': theme.text,
-        cursor: event.resourceId === USER_RESOURCE_ID ? 'move' : 'default',
+        cursor: isUserEvent ? 'move' : 'default',
       } as React.CSSProperties,
+      className: [
+        styles.foregroundEvent,
+        isUserEvent ? styles.userCard : styles.statsCard
+      ].join(' '),
     };
   }, []);
 

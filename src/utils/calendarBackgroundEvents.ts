@@ -1,3 +1,4 @@
+import { setDayStart, setDayEnd } from '../constants/votingResources';
 import { Interval } from '../types/topic';
 
 // Internal type for calculations
@@ -57,11 +58,8 @@ export const getBlockedIntervals = (date: Date, constraints: Interval[]): TimeRa
   }
 
   // Define day boundaries
-  const dayStart = new Date(date);
-  dayStart.setHours(0, 0, 0, 0);
-
-  const dayEnd = new Date(date);
-  dayEnd.setHours(23, 59, 59, 999);
+  const dayStart = setDayStart(date);
+  const dayEnd = setDayEnd(date);
 
   // 1. Convert constraint strings to Date objects and filter/trim to current day
   const relevantConstraints: TimeRange[] = [];
@@ -121,6 +119,8 @@ export const getBlockedIntervals = (date: Date, constraints: Interval[]): TimeRa
   return blocked;
 };
 
+export type VisualPosition = 'start' | 'middle' | 'end' | 'single';
+
 export interface BackgroundEvent {
   id: string;
   start: Date;
@@ -128,25 +128,34 @@ export interface BackgroundEvent {
   isBackground: boolean;
   resourceId: string; // Required to match CalendarRenderEvent
   title: string;
+  visualPosition: VisualPosition;
 }
 
 /**
  * Generates the actual event objects for React-Big-Calendar.
  * Since we want the background to span specific resources (or all), we must create duplicates
- * for each resourceId if the generic 'undefined' resourceId doesn't work for specific views.
+ * for each resourceId.
  *
- * In 'day' view with resources, RBC usually expects background events to have a resourceId
- * if we want them in that column, OR they might span if resourceId is missing (depends on version).
- * Safe bet: replicate for each resource column.
+ * visualPosition logic:
+ * - single: Only 1 resource column.
+ * - start: First column (leftmost).
+ * - end: Last column (rightmost).
+ * - middle: Intermediate columns.
  */
 export const generateBackgroundEvents = (
   blockedIntervals: TimeRange[],
   resourceIds: string[]
 ): BackgroundEvent[] => {
   const events: BackgroundEvent[] = [];
+  const count = resourceIds.length;
 
   blockedIntervals.forEach((interval, i) => {
     resourceIds.forEach((rId, rIndex) => {
+      let position: VisualPosition = 'middle';
+      if (count === 1) position = 'single';
+      else if (rIndex === 0) position = 'start';
+      else if (rIndex === count - 1) position = 'end';
+
       events.push({
         id: `bg-blocked-${i}-${rId}-${rIndex}`,
         start: interval.start,
@@ -154,6 +163,7 @@ export const generateBackgroundEvents = (
         isBackground: true,
         resourceId: rId,
         title: '',
+        visualPosition: position,
       });
     });
   });

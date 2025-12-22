@@ -5,24 +5,56 @@
   --calendar-card-shadow: 0 8px 24px rgba(23, 26, 43, 0.12);
   --calendar-gutter-width: 52px;
   --calendar-column-gap: 6px;
-  --calendar-card-border: #000000
+  --calendar-card-border: #000000;
   --calendar-card-fill: #fff;
   --calendar-card-text: #000;
 }
 
+/* Основа календаря: убираем внешние рамки и "странные" акценты */
 .calendarShell :global(.rbc-time-view) {
   border: none;
   background: #fbfcff;
   font-family: 'Inter', system-ui, sans-serif;
 }
 
+/* Убираем подсветку "сегодняшнего" дня (желтоватый/синеватый фон) */
+.calendarShell :global(.rbc-today) {
+  background-color: transparent;
+}
+
+/* Шапка: убираем все границы */
 .calendarShell :global(.rbc-time-header) {
   border: none;
-  padding: 0 8px;
+  padding: 8 8px;
+}
+
+/* Скрываем секцию "Весь день" (all-day), оставляя заголовки ресурсов */
+.calendarShell :global(.rbc-allday-cell) {
+  display: none !important;
 }
 
 .calendarShell :global(.rbc-time-header-content) {
-  border-left: none;
+  border: none;
+}
+
+.calendarShell :global(.rbc-header) {
+  border: none; /* Убирает вертикальные разделители в шапке */
+  padding: 0.3rem;
+}
+
+/* Убираем тонкие вертикальные линии между ресурсами в основном теле */
+.calendarShell :global(.rbc-day-bg),
+.calendarShell :global(.rbc-time-content > * + * > *) {
+   border-left: none !important;
+}
+
+.calendarShell :global(.rbc-label) {
+  border: none;
+  background-color: transparent;
+}
+
+.calendarShell :global(.rbc-row.rbc-row-resource) {
+  border: none;
 }
 
 .calendarShell :global(.rbc-row-resource) {
@@ -30,8 +62,11 @@
   font-weight: 600;
   text-transform: uppercase;
   color: #6c738c;
+  text-align: center;
+  border: none;
 }
 
+/* Колонка времени (слева) */
 .calendarShell :global(.rbc-time-gutter) {
   width: var(--calendar-gutter-width);
   padding-right: 4px;
@@ -43,38 +78,60 @@
   color: #7d859f;
   font-size: 0.72rem;
   letter-spacing: 0.04em;
-}
-
-.calendarShell :global(.rbc-time-content) {
-  gap: var(--calendar-column-gap);
-  border-top: 1px solid #edf0fb;
-}
-
-.calendarShell :global(.rbc-time-column) {
   border: none;
-  padding: 0 4px 0 0;
 }
 
+/* Основное тело с сеткой */
+.calendarShell :global(.rbc-time-content) {
+  border-top: 1px solid #edf0fb; /* Единственная верхняя граница, отделяющая шапку */
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  gap: 0;
+}
+
+/* Колонки ресурсов */
+.calendarShell :global(.rbc-time-column) {
+  border: none; /* Убирает вертикальные линии между ресурсами */
+  padding: 0;
+}
+
+/* Горизонтальные линии сетки: оставляем только часовые линии */
+.calendarShell :global(.rbc-timeslot-group) {
+  border-bottom: 1px solid #f0f2fb; /* Линия только в конце часа/группы */
+}
+
+/* Убираем линии у "получасовых" слотов внутри группы */
 .calendarShell :global(.rbc-day-slot .rbc-time-slot) {
-  border-top: 1px solid #f0f2fb;
+  border-top: none; 
 }
 
-.calendarShell :global(.rbc-day-slot .rbc-time-slot:nth-child(even)) {
-  background: #fefefe;
+/* Убираем штатные границы rbc-timeslot-group, если они заданы иначе */
+.calendarShell :global(.rbc-timeslot-group) {
+  border-bottom: 1px solid #f0f2fb; 
 }
+
+/* Фикс для первой линии, чтобы не двоилась с border-top контейнера
+.calendarShell :global(.rbc-timeslot-group:first-child) {
+    border-top: none; 
+} */
+
+/* Убрать чередование цветов, если есть, или сделать его очень тонким */
+.calendarShell :global(.rbc-day-slot .rbc-time-slot:nth-child(even)) {
+  background: transparent;
+}
+
+/* --- Стили событий (Карточки) --- */
 
 .calendarShell :global(.rbc-event) {
   border: none;
   padding: 0;
   background: transparent;
   display: flex;
+  outline: none;
 }
 
-.calendarShell :global(.rbc-event-content) {
-  width: 100%;
-}
-
-.eventCard {
+.foregroundEvent.foregroundEvent {
   height: 100%;
   padding: var(--calendar-card-padding);
   border-radius: var(--calendar-card-radius);
@@ -82,6 +139,26 @@
   background: var(--calendar-card-fill, #fff);
   color: var(--calendar-card-text, #101828);
   box-shadow: var(--calendar-card-shadow);
+  display: flex !important;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.foregroundEvent :global(.rbc-event-label) {
+  display: none !important;
+}
+
+.backgroundEvent {
+  padding: 0 !important;
+  z-index: 0;
+}
+
+.calendarShell :global(.rbc-event-content) {
+  width: 100%;
+  flex: 1;
+}
+
+.eventContent {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -106,6 +183,11 @@
   opacity: 0.92;
 }
 
+.userCard {
+  /* Explicit identifier for user cards */
+}
+
+/* Responsiveness */
 .desktop {
   padding-right: 6px;
 }
@@ -131,9 +213,10 @@
   gap: 2px;
 }
 
-.compact .eventCard {
+.compact .foregroundEvent {
   box-shadow: 0 6px 18px rgba(21, 32, 67, 0.15);
 }
 
-
-
+.calendarShell :global(.rbc-events-container) {
+  margin: 0;
+}
