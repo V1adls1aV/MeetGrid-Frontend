@@ -36,9 +36,38 @@ const formatTimeRange = (start: string, end: string) => {
   return `${new Date(start).toLocaleTimeString("ru-RU", options)} — ${new Date(end).toLocaleTimeString("ru-RU", options)}`;
 };
 
+const getParticipantSuffix = (count: number) => {
+  const lastDigit = count % 10;
+  const lastTwoDigits = count % 100;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return "участников";
+  }
+  if (lastDigit === 1) {
+    return "участник";
+  }
+  if (lastDigit >= 2 && lastDigit <= 4) {
+    return "участника";
+  }
+  return "участников";
+};
+
+const formatPeopleCount = (min: number, max: number, useShort = false) => {
+  const isSingle = min === max;
+  const countStr = isSingle ? `${min}` : `${min}-${max}`;
+
+  if (useShort) {
+    return `${countStr} чел.`;
+  }
+
+  // Для диапазонов всегда используем "участников" (напр. 2-5 участников)
+  const suffix = isSingle ? getParticipantSuffix(min) : "участников";
+  return `${countStr} ${suffix}`;
+};
+
 const mapBlocks = (label: string, intervals: StatsInterval[]) =>
   intervals.map((interval, index) => ({
-    label: `${interval.people_min}-${interval.people_max} участников ${label}`,
+    label: `${formatPeopleCount(interval.people_min, interval.people_max)} ${label}`,
     range: formatTimeRange(interval.start, interval.end),
     key: `${label}-${index}-${interval.start}`,
   }));
@@ -54,7 +83,7 @@ const statsToEvents = (stats?: TopicStats): VotingEvent[] => {
   ) =>
     intervals.map((interval, index) => ({
       id: `${resourceId}-${index}-${interval.start}`,
-      title: `${interval.people_min}-${interval.people_max} чел.`,
+      title: formatPeopleCount(interval.people_min, interval.people_max, true),
       start: new Date(interval.start),
       end: new Date(interval.end),
       resourceId,

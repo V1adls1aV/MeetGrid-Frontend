@@ -5,7 +5,7 @@ import dayjs, { Dayjs } from "dayjs";
 interface CalendarControlsProps {
   date: Date;
   onChange: (next: Date) => void;
-  availableDates?: Set<string>;
+  availableDates?: Set<string> | null;
 }
 
 const shiftDate = (date: Date, offsetDays: number) => {

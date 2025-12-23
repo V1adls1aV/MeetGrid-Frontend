@@ -24,7 +24,13 @@ export const normalizeDate = (value: Date | string) =>
  * Returns a Set of local dates (YYYY-MM-DD) that have assigned intervals.
  * "Today" is always included in the returned set.
  */
-export const getAvailableDates = (intervals: Interval[]): Set<string> => {
+export const getAvailableDates = (
+  intervals: Interval[],
+): Set<string> | null => {
+  if (intervals.length === 0) {
+    return null;
+  }
+
   const dates = new Set<string>();
   // Always allow today
   dates.add(dayjs().format("YYYY-MM-DD"));
@@ -34,10 +40,7 @@ export const getAvailableDates = (intervals: Interval[]): Set<string> => {
     const endDate = dayjs(inv.end);
 
     // Add days that the interval covers
-    while (
-      current.isBefore(endDate) ||
-      current.isSame(endDate, "day")
-    ) {
+    while (current.isBefore(endDate) || current.isSame(endDate, "day")) {
       dates.add(current.format("YYYY-MM-DD"));
       current = current.add(1, "day");
     }
