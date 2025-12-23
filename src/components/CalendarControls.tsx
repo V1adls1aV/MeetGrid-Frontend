@@ -1,10 +1,11 @@
 import React, { useCallback } from "react";
 import { Button, DatePicker } from "antd";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 interface CalendarControlsProps {
   date: Date;
   onChange: (next: Date) => void;
+  availableDates?: Set<string>;
 }
 
 const shiftDate = (date: Date, offsetDays: number) => {
@@ -16,8 +17,17 @@ const shiftDate = (date: Date, offsetDays: number) => {
 const CalendarControls: React.FC<CalendarControlsProps> = ({
   date,
   onChange,
+  availableDates,
 }) => {
   const value = dayjs(date);
+
+  const disabledDate = useCallback(
+    (current: Dayjs) => {
+      if (!availableDates) return false;
+      return !availableDates.has(current.format("YYYY-MM-DD"));
+    },
+    [availableDates],
+  );
 
   const handlePick = useCallback(
     (picked: dayjs.Dayjs | null) => {
@@ -46,6 +56,7 @@ const CalendarControls: React.FC<CalendarControlsProps> = ({
         onChange={handlePick}
         allowClear={false}
         placeholder="Дата"
+        disabledDate={disabledDate}
       />
       <Button onClick={() => onChange(shiftDate(date, -1))}>Назад</Button>
       <Button onClick={goToday}>Сегодня</Button>

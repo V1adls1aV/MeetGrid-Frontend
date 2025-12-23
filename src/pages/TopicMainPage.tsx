@@ -24,6 +24,7 @@ import {
   slotsEqual,
   slotsToIntervals,
 } from "../utils/voteHelpers";
+import { getAvailableDates } from "../utils/calendarEventHelpers";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -154,6 +155,10 @@ const TopicMainPage: React.FC = () => {
   }, [stats]);
 
   const statsEvents = useMemo(() => statsToEvents(stats ?? undefined), [stats]);
+  const availableDates = useMemo(
+    () => getAvailableDates(topic?.constraints ?? []),
+    [topic?.constraints],
+  );
   const userEvents = useMemo(() => userSlots.map(slotToEvent), [userSlots]);
   const ladderBlocks = useMemo(() => {
     if (!stats) {
@@ -258,7 +263,11 @@ const TopicMainPage: React.FC = () => {
             Выбор времени
           </Title>
         </div>
-        <CalendarControls date={currentDate} onChange={setCurrentDate} />
+        <CalendarControls
+          date={currentDate}
+          onChange={setCurrentDate}
+          availableDates={availableDates}
+        />
       </header>
 
       {error && (

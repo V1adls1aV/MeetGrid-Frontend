@@ -8,7 +8,6 @@ import ConstraintsCalendar, {
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setDraftConstraints } from "../store/topicSlice";
 import { Interval } from "../types/topic";
-
 const { Title, Paragraph } = Typography;
 
 const eventToInterval = (event: ConstraintEvent): Interval => ({
@@ -34,7 +33,6 @@ const TopicConstraintsPage: React.FC = () => {
     () => draftConstraints.map(intervalToEvent),
     [draftConstraints],
   );
-
   const handleChange = useCallback(
     (nextEvents: ConstraintEvent[]) => {
       dispatch(setDraftConstraints(nextEvents.map(eventToInterval)));
