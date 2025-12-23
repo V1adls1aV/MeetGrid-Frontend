@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { Calendar, SlotInfo } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
-import { Modal } from "antd";
+import { Modal, Spin } from "antd";
 import useMediaQuery from "../hooks/useMediaQuery";
 import { COMPACT_MEDIA_QUERY, getResourceTheme } from "../theme/calendarTokens";
 import {
@@ -58,6 +58,7 @@ interface VotingCalendarProps {
   onUserEventsChange: (next: VotingEvent[]) => void;
   onDateChange: (next: Date) => void;
   constraints?: Interval[];
+  loading?: boolean;
 }
 
 const VotingCalendar: React.FC<VotingCalendarProps> = ({
@@ -67,6 +68,7 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
   onUserEventsChange,
   onDateChange,
   constraints = [],
+  loading = false,
 }) => {
   const events = useMemo(
     () => [...statsEvents, ...userEvents],
@@ -302,7 +304,7 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
     .join(" ");
 
   return (
-    <div className={shellClassName}>
+    <div className={shellClassName} style={{ position: "relative" }}>
       <DnDCalendar
         culture="ru"
         date={date}
@@ -332,6 +334,11 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
         components={calendarComponents}
         style={{ height: "100%" }}
       />
+      {loading && (
+        <div className={styles.calendarLoadingOverlay}>
+          <Spin size="large" />
+        </div>
+      )}
     </div>
   );
 };

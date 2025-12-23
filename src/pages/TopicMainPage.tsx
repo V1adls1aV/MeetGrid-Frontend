@@ -261,12 +261,6 @@ const TopicMainPage: React.FC = () => {
         <CalendarControls date={currentDate} onChange={setCurrentDate} />
       </header>
 
-      {loading && (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <Spin />
-        </div>
-      )}
-
       {error && (
         <Alert
           message="Не удалось загрузить данные"
@@ -283,6 +277,7 @@ const TopicMainPage: React.FC = () => {
         onUserEventsChange={handleUserEventsChange}
         onDateChange={setCurrentDate}
         constraints={topic?.constraints ?? []}
+        loading={loading}
       />
 
       <div>

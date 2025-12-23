@@ -197,6 +197,7 @@ const TopicAdminPage: React.FC = () => {
         date={currentDate}
         events={calendarEvents}
         onEventsChange={handleEventsChange}
+        loading={loading}
       />
 
       <div style={{ display: "flex", justifyContent: "flex-end" }}>

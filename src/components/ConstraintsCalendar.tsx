@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { Calendar } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
-import { Modal } from "antd";
+import { Modal, Spin } from "antd";
 import calendarLocalizer from "../utils/calendarLocalizer";
 import {
   createEventId,
@@ -24,6 +24,7 @@ interface ConstraintsCalendarProps {
   date: Date;
   events: ConstraintEvent[];
   onEventsChange: (next: ConstraintEvent[]) => void;
+  loading?: boolean;
 }
 
 interface DragEventArgs {
@@ -56,6 +57,7 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
   date,
   events,
   onEventsChange,
+  loading = false,
 }) => {
   const scrollToTime = useMemo(() => {
     const anchor = new Date(date);
@@ -151,29 +153,48 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
   );
 
   return (
-    <DnDCalendar
-      culture="ru"
-      date={date}
-      defaultDate={date}
-      events={events}
-      localizer={calendarLocalizer}
-      messages={calendarMessages}
-      defaultView="day"
-      views={{ day: true }}
-      toolbar={false}
-      selectable
-      resizable
-      step={15}
-      timeslots={4}
-      scrollToTime={scrollToTime}
-      onSelectSlot={handleSelectSlot}
-      onEventDrop={handleEventDrop}
-      onEventResize={handleEventResize}
-      onSelectEvent={handleSelectEvent}
-      draggableAccessor={() => true}
-      resizableAccessor={() => true}
-      style={{ height: 520 }}
-    />
+    <div style={{ position: "relative", height: 520 }}>
+      <DnDCalendar
+        culture="ru"
+        date={date}
+        defaultDate={date}
+        events={events}
+        localizer={calendarLocalizer}
+        messages={calendarMessages}
+        defaultView="day"
+        views={{ day: true }}
+        toolbar={false}
+        selectable
+        resizable
+        step={15}
+        timeslots={4}
+        scrollToTime={scrollToTime}
+        onSelectSlot={handleSelectSlot}
+        onEventDrop={handleEventDrop}
+        onEventResize={handleEventResize}
+        onSelectEvent={handleSelectEvent}
+        draggableAccessor={() => true}
+        resizableAccessor={() => true}
+        style={{ height: "100%" }}
+      />
+      {loading && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+            background: "rgba(255, 255, 255, 0.4)",
+            zIndex: 100,
+            borderRadius: "10px",
+          }}
+        >
+          <Spin size="large" />
+        </div>
+      )}
+    </div>
   );
 };
 
