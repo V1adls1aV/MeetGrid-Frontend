@@ -1,7 +1,8 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import { Button, DatePicker, Typography } from "antd";
+import { DatePicker, Typography, FloatButton } from "antd";
+import { SaveOutlined } from "@ant-design/icons";
 import ConstraintsCalendar, {
   ConstraintEvent,
 } from "../components/ConstraintsCalendar";
@@ -46,51 +47,88 @@ const TopicConstraintsPage: React.FC = () => {
   }, []);
 
   return (
-    <section
+    <div
       style={{
-        padding: "2rem",
         display: "flex",
-        flexDirection: "column",
-        gap: "1.5rem",
+        justifyContent: "center",
+        height: "100dvh",
+        backgroundColor: "#f5f5f5", // Ensure bg matches
+        overflow: "hidden",
       }}
     >
-      <header
+      <section
         style={{
+          padding: "1.5rem", // slightly reduced padding to match MainPage often having 1.5rem
           display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
+          flexDirection: "column",
           gap: "1rem",
+          maxWidth: "768px",
+          width: "100%",
+          position: "relative",
+          height: "100%",
         }}
       >
-        <div>
-          <Title level={2} style={{ marginBottom: "0.25rem" }}>
-            Ограничения
-          </Title>
-          <Paragraph style={{ margin: 0 }}>
-            Слот добавляется по выделению; клик по событию удаляет его.
-          </Paragraph>
+        <header
+          style={{
+            flexShrink: 0,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "1rem",
+            background: "#fff",
+            padding: "1rem",
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          }}
+        >
+          <div>
+            <Title level={2} style={{ marginBottom: "0.25rem" }}>
+              Ограничения
+            </Title>
+            <Paragraph style={{ margin: 0 }} type="secondary">
+              Слот добавляется по выделению; клик по событию удаляет его.
+            </Paragraph>
+          </div>
+          <DatePicker
+            value={dayjs(currentDate)}
+            onChange={handleDateChange}
+            allowClear={false}
+            placeholder="Дата"
+          />
+        </header>
+
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+          }}
+        >
+          <ConstraintsCalendar
+            date={currentDate}
+            events={events}
+            onEventsChange={handleChange}
+          />
         </div>
-        <DatePicker
-          value={dayjs(currentDate)}
-          onChange={handleDateChange}
-          allowClear={false}
-          placeholder="Дата"
+
+        <FloatButton
+          icon={<SaveOutlined />}
+          type="primary"
+          style={{
+            position: "absolute",
+            right: 38,
+            bottom: 32,
+            width: 56,
+            height: 56,
+          }}
+          onClick={goBack}
+          tooltip="Сохранить и вернуться"
         />
-      </header>
-
-      <ConstraintsCalendar
-        date={currentDate}
-        events={events}
-        onEventsChange={handleChange}
-      />
-
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <Button onClick={goBack}>Назад</Button>
-        <Button type="primary" onClick={goBack}>
-          Сохранить и вернуться
-        </Button>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 };
 
