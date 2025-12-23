@@ -1,0 +1,82 @@
+/**
+ * Styles for the calendar grid, time gutter, and time indicator.
+ */
+
+.calendarShell :global(.rbc-time-gutter) {
+  width: var(--calendar-gutter-width);
+  padding-right: 4px;
+  border: none;
+  background: #fbfcff;
+}
+
+.calendarShell :global(.rbc-time-gutter .rbc-timeslot-group) {
+  color: #7d859f;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  border: none;
+}
+
+.calendarShell :global(.rbc-time-content) {
+  border: none;
+  border-radius: var(--board-radius);
+  gap: 0;
+}
+
+.calendarShell :global(.rbc-time-column) {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Hourly grid lines */
+.calendarShell :global(.rbc-timeslot-group) {
+  border-bottom: 1px solid #f0f2fb;
+}
+
+/* Remove internal half-hour lines */
+.calendarShell :global(.rbc-day-slot .rbc-time-slot) {
+  border-top: none;
+}
+
+.calendarShell :global(.rbc-day-slot .rbc-time-slot:nth-child(even)) {
+  background: transparent;
+}
+
+/* Current time indicator line */
+.calendarShell :global(.rbc-current-time-indicator) {
+  background-color: #dc303084;
+  z-index: 10;
+}
+
+/* Red dot for current time indicator */
+.calendarShell
+  :global(
+    .rbc-time-content
+      .rbc-day-slot.rbc-time-column:nth-child(2)
+      .rbc-current-time-indicator::before
+  ) {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: #ff3b30;
+  border-radius: 10px;
+  transform: translate(-25%, -51%);
+}
+
+/* Align time labels with lines */
+.calendarShell :global(.rbc-timeslot-group .rbc-time-slot .rbc-label) {
+  display: block;
+  transform: translateY(-50%);
+}
+
+.calendarShell
+  :global(.rbc-timeslot-group:first-of-type .rbc-time-slot .rbc-label) {
+  content-visibility: hidden;
+}
+
+.calendarShell :global(.rbc-events-container) {
+  margin: 0;
+}

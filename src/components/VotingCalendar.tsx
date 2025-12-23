@@ -34,7 +34,10 @@ import {
   fitsConstraints,
   showValidationWarning,
 } from "../utils/intervalGuards";
-import styles from "./VotingCalendar.module.css";
+import baseStyles from "./CalendarBase.module.css";
+import gridStyles from "./CalendarGrid.module.css";
+import cardStyles from "./CalendarCards.module.css";
+import layoutStyles from "./CalendarLayout.module.css";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
@@ -167,7 +170,7 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
         style.borderBottomRightRadius = radius;
       }
 
-      return { style, className: styles.backgroundEvent };
+      return { style, className: cardStyles.backgroundEvent };
     }
 
     const theme = getResourceTheme(event.resourceId as CalendarResourceId);
@@ -181,8 +184,8 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
         cursor: isUserEvent ? "move" : "default",
       } as React.CSSProperties,
       className: [
-        styles.foregroundEvent,
-        isUserEvent ? styles.userCard : styles.statsCard,
+        cardStyles.foregroundEvent,
+        isUserEvent ? cardStyles.userCard : cardStyles.statsCard,
       ].join(" "),
     };
   }, []);
@@ -193,8 +196,10 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
   );
 
   const shellClassName = [
-    styles.calendarShell,
-    isCompact ? styles.compact : styles.desktop,
+    baseStyles.calendarShell,
+    gridStyles.calendarShell,
+    cardStyles.calendarShell,
+    isCompact ? layoutStyles.compact : layoutStyles.desktop,
   ]
     .filter(Boolean)
     .join(" ");
@@ -235,7 +240,7 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
         style={{ height: "100%" }}
       />
       {loading && (
-        <div className={styles.calendarLoadingOverlay}>
+        <div className={layoutStyles.calendarLoadingOverlay}>
           <Spin size="large" />
         </div>
       )}

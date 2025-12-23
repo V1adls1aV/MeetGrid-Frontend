@@ -1,0 +1,70 @@
+/**
+ * Base styles for React Big Calendar.
+ * Removes default borders, outlines, and resets background.
+ */
+
+.calendarShell {
+  height: 520px;
+  --board-radius: 10px;
+  --calendar-card-padding: 8px;
+  --calendar-card-radius: var(--board-radius);
+  --calendar-card-shadow: 0 0 0 rgba(23, 26, 43, 0.12);
+  --calendar-gutter-width: 52px;
+  --calendar-column-gap: 6px;
+}
+
+.calendarShell :global(.rbc-time-view) {
+  border: none;
+  background: #fbfcff;
+  border-radius: var(--board-radius);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Remove "today" highlight */
+.calendarShell :global(.rbc-today) {
+  background-color: transparent;
+}
+
+/* Header styling */
+.calendarShell :global(.rbc-time-header) {
+  border: none;
+  padding: 8px 8px;
+}
+
+.calendarShell :global(.rbc-time-header-content) {
+  border: none;
+}
+
+.calendarShell :global(.rbc-header) {
+  border: none;
+  padding: 0.3rem;
+}
+
+/* Hide all-day cell */
+.calendarShell :global(.rbc-allday-cell) {
+  display: none !important;
+}
+
+/* Remove vertical separators between resources */
+.calendarShell :global(.rbc-day-bg),
+.calendarShell :global(.rbc-time-content > * + * > *) {
+  border-left: none !important;
+}
+
+.calendarShell :global(.rbc-label) {
+  border: none;
+  background-color: transparent;
+}
+
+.calendarShell :global(.rbc-row.rbc-row-resource) {
+  border: none;
+}
+
+.calendarShell :global(.rbc-row-resource) {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6c738c;
+  text-align: center;
+  border: none;
+}

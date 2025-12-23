@@ -1,0 +1,73 @@
+/**
+ * Styles for calendar events (cards) and their contents.
+ */
+
+.calendarShell :global(.rbc-event) {
+  border: none;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  outline: none;
+}
+
+.foregroundEvent.foregroundEvent {
+  height: 100%;
+  padding: var(--calendar-card-padding);
+  border-radius: var(--calendar-card-radius);
+  border-left: 6px solid var(--calendar-card-border, #000);
+  background: var(--calendar-card-fill, #fff);
+  color: var(--calendar-card-text, #101828);
+  box-shadow: var(--calendar-card-shadow);
+  display: flex !important;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Hide default label inside our custom card */
+.foregroundEvent :global(.rbc-event-label) {
+  display: none !important;
+}
+
+/* Background events styling for blocked intervals */
+.backgroundEvent {
+  /* Defined in eventPropGetter style object, but managed here if needed */
+}
+
+.calendarShell :global(.rbc-background-event .rbc-event-content),
+.calendarShell :global(.rbc-background-event .rbc-event-label) {
+  content-visibility: hidden;
+}
+
+.calendarShell :global(.rbc-event-content) {
+  width: 100%;
+  flex: 1;
+}
+
+.eventContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.eventTitle {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.eventTime {
+  font-size: 0.78rem;
+  color: rgba(16, 24, 40, 0.75);
+}
+
+.eventMeta {
+  font-size: 0.72rem;
+  color: rgba(16, 24, 40, 0.8);
+}
+
+.statsCard {
+  opacity: 0.92;
+}
+
+.userCard {
+  /* Specific styles for user-created cards */
+}

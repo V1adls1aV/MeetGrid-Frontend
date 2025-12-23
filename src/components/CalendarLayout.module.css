@@ -1,0 +1,35 @@
+/**
+ * Responsive layout and overlay styles.
+ */
+
+.desktop {
+  padding-right: 6px;
+}
+
+.compact :global(.rbc-time-header .rbc-row.rbc-time-header-cell) {
+  display: none;
+}
+
+.compact :global(.rbc-time-gutter) {
+  width: 40px;
+}
+
+.compact :global(.rbc-day-slot .rbc-event) {
+  width: 100%;
+  margin-left: 0;
+}
+
+.compact .foregroundEvent {
+  box-shadow: 0 6px 18px rgba(21, 32, 67, 0.15);
+}
+
+.calendarLoadingOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 100;
+  border-radius: var(--board-radius);
+}

@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import type { EventProps } from "react-big-calendar";
 import { USER_RESOURCE_ID } from "../constants/votingResources";
 import type { CalendarRenderEvent } from "../utils/calendarLayout";
-import styles from "./VotingCalendar.module.css";
+import styles from "./CalendarCards.module.css";
 
 const timeFormatter = new Intl.DateTimeFormat("ru-RU", {
   hour: "2-digit",
