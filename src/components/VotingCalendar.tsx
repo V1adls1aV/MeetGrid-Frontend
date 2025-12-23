@@ -2,13 +2,8 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Calendar } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import { Spin } from "antd";
-import useMediaQuery from "../hooks/useMediaQuery";
 import { useCalendarHandlers } from "../hooks/useCalendarHandlers";
-import {
-  COMPACT_MEDIA_QUERY,
-  getResourceTheme,
-  CalendarResourceId,
-} from "../theme/calendarTokens";
+import { getResourceTheme, CalendarResourceId } from "../theme/calendarTokens";
 import {
   buildResourceList,
   CalendarRenderEvent,
@@ -80,7 +75,7 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
     () => [...statsEvents, ...userEvents],
     [statsEvents, userEvents],
   );
-  const isCompact = useMediaQuery(COMPACT_MEDIA_QUERY);
+  const isCompact = false;
   const layoutResources = useMemo(
     () => buildResourceList(isCompact),
     [isCompact],
