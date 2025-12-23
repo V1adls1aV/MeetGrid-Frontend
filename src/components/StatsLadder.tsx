@@ -1,5 +1,5 @@
-import React from 'react';
-import { Card, Space } from 'antd';
+import React from "react";
+import { Card, Space } from "antd";
 
 interface Block {
   key: string;
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const StatsLadder: React.FC<Props> = ({ blocks }) => (
-  <Space direction="vertical" style={{ width: '100%' }}>
+  <Space direction="vertical" style={{ width: "100%" }}>
     {blocks.map((block) => (
       <Card key={block.key} size="small">
         <div>

@@ -1,13 +1,16 @@
-import { getApiUrl } from '../config/apiConfig';
+import { getApiUrl } from "../config/apiConfig";
 import {
   CreatedTopic,
   TopicResponse,
   TopicCreatePayload,
   VotePayload,
   ConstraintsPayload,
-} from '../types/topic';
+} from "../types/topic";
 
-const appendQuery = (path: string, params?: Record<string, string | undefined>) => {
+const appendQuery = (
+  path: string,
+  params?: Record<string, string | undefined>,
+) => {
   if (!params) {
     return path;
   }
@@ -17,10 +20,13 @@ const appendQuery = (path: string, params?: Record<string, string | undefined>) 
     return path;
   }
 
-  const payload = entries.reduce<Record<string, string>>((acc, [key, value]) => {
-    acc[key] = value as string;
-    return acc;
-  }, {});
+  const payload = entries.reduce<Record<string, string>>(
+    (acc, [key, value]) => {
+      acc[key] = value as string;
+      return acc;
+    },
+    {},
+  );
   const joined = new URLSearchParams(payload).toString();
   return `${path}?${joined}`;
 };
@@ -29,7 +35,7 @@ const requestJson = async <T>(path: string, options: RequestInit = {}) => {
   const response = await fetch(getApiUrl(path), {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(options.headers ?? {}),
     },
   });
@@ -44,32 +50,38 @@ const requestJson = async <T>(path: string, options: RequestInit = {}) => {
 
 export const createTopic = async (
   payload: TopicCreatePayload,
-  username: string
+  username: string,
 ): Promise<CreatedTopic> =>
-  requestJson<CreatedTopic>(appendQuery('/', { username }), {
-    method: 'POST',
+  requestJson<CreatedTopic>(appendQuery("/", { username }), {
+    method: "POST",
     body: JSON.stringify(payload),
   });
 
-export const fetchTopic = async (topicId: string, username?: string): Promise<TopicResponse> =>
+export const fetchTopic = async (
+  topicId: string,
+  username?: string,
+): Promise<TopicResponse> =>
   requestJson<TopicResponse>(appendQuery(`/${topicId}`, { username }));
 
 export const saveVote = async (
   topicId: string,
   username: string,
-  payload: VotePayload
+  payload: VotePayload,
 ): Promise<TopicResponse> =>
   requestJson<TopicResponse>(appendQuery(`/${topicId}/pick`, { username }), {
-    method: 'PUT',
+    method: "PUT",
     body: JSON.stringify(payload),
   });
 
 export const updateConstraints = async (
   topicId: string,
   username: string,
-  payload: ConstraintsPayload
+  payload: ConstraintsPayload,
 ): Promise<TopicResponse> =>
-  requestJson<TopicResponse>(appendQuery(`/${topicId}/constraints`, { username }), {
-    method: 'PUT',
-    body: JSON.stringify(payload),
-  });
+  requestJson<TopicResponse>(
+    appendQuery(`/${topicId}/constraints`, { username }),
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+  );

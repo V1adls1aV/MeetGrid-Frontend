@@ -14,7 +14,7 @@
 .calendarShell :global(.rbc-time-view) {
   border: none;
   background: #fbfcff;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
 }
 
 /* Убираем подсветку "сегодняшнего" дня (желтоватый/синеватый фон) */
@@ -45,7 +45,7 @@
 /* Убираем тонкие вертикальные линии между ресурсами в основном теле */
 .calendarShell :global(.rbc-day-bg),
 .calendarShell :global(.rbc-time-content > * + * > *) {
-   border-left: none !important;
+  border-left: none !important;
 }
 
 .calendarShell :global(.rbc-label) {
@@ -103,12 +103,12 @@
 
 /* Убираем линии у "получасовых" слотов внутри группы */
 .calendarShell :global(.rbc-day-slot .rbc-time-slot) {
-  border-top: none; 
+  border-top: none;
 }
 
 /* Убираем штатные границы rbc-timeslot-group, если они заданы иначе */
 .calendarShell :global(.rbc-timeslot-group) {
-  border-bottom: 1px solid #f0f2fb; 
+  border-bottom: 1px solid #f0f2fb;
 }
 
 /* Фикс для первой линии, чтобы не двоилась с border-top контейнера
@@ -183,9 +183,8 @@
   opacity: 0.92;
 }
 
-.userCard {
-  /* Explicit identifier for user cards */
-}
+/* .userCard {
+} */
 
 /* Responsiveness */
 .desktop {

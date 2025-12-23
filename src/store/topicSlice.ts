@@ -1,11 +1,17 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CreatedTopic, TopicCreatePayload, TopicResponse, VotePayload, ConstraintsPayload } from '../types/topic';
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  CreatedTopic,
+  TopicCreatePayload,
+  TopicResponse,
+  VotePayload,
+  ConstraintsPayload,
+} from "../types/topic";
 import {
   createTopic as createTopicRequest,
   fetchTopic as fetchTopicRequest,
   saveVote as saveVoteRequest,
   updateConstraints as updateConstraintsRequest,
-} from '../services/topicService';
+} from "../services/topicService";
 
 interface TopicFormDraft {
   topicName: string;
@@ -14,19 +20,19 @@ interface TopicFormDraft {
 }
 
 export interface TopicState {
-  topic: TopicResponse['topic'] | null;
-  stats: TopicResponse['stats'] | null;
+  topic: TopicResponse["topic"] | null;
+  stats: TopicResponse["stats"] | null;
   inviteLink: string | null;
-  draftConstraints: TopicCreatePayload['constraints'];
+  draftConstraints: TopicCreatePayload["constraints"];
   draftForm: TopicFormDraft;
   loading: boolean;
   error: string | null;
 }
 
 const buildEmptyDraftForm = (): TopicFormDraft => ({
-  topicName: '',
-  adminName: '',
-  description: '',
+  topicName: "",
+  adminName: "",
+  description: "",
 });
 
 const initialState: TopicState = {
@@ -40,58 +46,71 @@ const initialState: TopicState = {
 };
 
 const buildError = (value: unknown) =>
-  value instanceof Error ? value.message : typeof value === 'string' ? value : 'Неизвестная ошибка';
+  value instanceof Error
+    ? value.message
+    : typeof value === "string"
+      ? value
+      : "Неизвестная ошибка";
 
-export const createTopicThunk = createAsyncThunk<CreatedTopic, { payload: TopicCreatePayload; username: string }, { rejectValue: string }>(
-  'topic/create',
-  async ({ payload, username }, { rejectWithValue }) => {
-    try {
-      return await createTopicRequest(payload, username);
-    } catch (error) {
-      return rejectWithValue(buildError(error));
-    }
-  }
-);
-
-export const fetchTopicThunk = createAsyncThunk<TopicResponse, { topicId: string; username?: string }, { rejectValue: string }>(
-  'topic/fetch',
-  async ({ topicId, username }, { rejectWithValue }) => {
-    try {
-      return await fetchTopicRequest(topicId, username);
-    } catch (error) {
-      return rejectWithValue(buildError(error));
-    }
-  }
-);
-
-export const saveVoteThunk = createAsyncThunk<TopicResponse, { topicId: string; username: string; payload: VotePayload }, { rejectValue: string }>(
-  'topic/save',
-  async ({ topicId, username, payload }, { rejectWithValue }) => {
-    try {
-      return await saveVoteRequest(topicId, username, payload);
-    } catch (error) {
-      return rejectWithValue(buildError(error));
-    }
-  }
-);
-
-export const updateConstraintsThunk = createAsyncThunk<
-  TopicResponse,
-  { topicId: string; username: string; payload: ConstraintsPayload },
+export const createTopicThunk = createAsyncThunk<
+  CreatedTopic,
+  { payload: TopicCreatePayload; username: string },
   { rejectValue: string }
->('topic/constraints', async ({ topicId, username, payload }, { rejectWithValue }) => {
+>("topic/create", async ({ payload, username }, { rejectWithValue }) => {
   try {
-    return await updateConstraintsRequest(topicId, username, payload);
+    return await createTopicRequest(payload, username);
   } catch (error) {
     return rejectWithValue(buildError(error));
   }
 });
 
+export const fetchTopicThunk = createAsyncThunk<
+  TopicResponse,
+  { topicId: string; username?: string },
+  { rejectValue: string }
+>("topic/fetch", async ({ topicId, username }, { rejectWithValue }) => {
+  try {
+    return await fetchTopicRequest(topicId, username);
+  } catch (error) {
+    return rejectWithValue(buildError(error));
+  }
+});
+
+export const saveVoteThunk = createAsyncThunk<
+  TopicResponse,
+  { topicId: string; username: string; payload: VotePayload },
+  { rejectValue: string }
+>("topic/save", async ({ topicId, username, payload }, { rejectWithValue }) => {
+  try {
+    return await saveVoteRequest(topicId, username, payload);
+  } catch (error) {
+    return rejectWithValue(buildError(error));
+  }
+});
+
+export const updateConstraintsThunk = createAsyncThunk<
+  TopicResponse,
+  { topicId: string; username: string; payload: ConstraintsPayload },
+  { rejectValue: string }
+>(
+  "topic/constraints",
+  async ({ topicId, username, payload }, { rejectWithValue }) => {
+    try {
+      return await updateConstraintsRequest(topicId, username, payload);
+    } catch (error) {
+      return rejectWithValue(buildError(error));
+    }
+  },
+);
+
 const topicSlice = createSlice({
-  name: 'topic',
+  name: "topic",
   initialState,
   reducers: {
-    setDraftConstraints(state, action: { payload: TopicCreatePayload['constraints'] }) {
+    setDraftConstraints(
+      state,
+      action: { payload: TopicCreatePayload["constraints"] },
+    ) {
       state.draftConstraints = action.payload;
     },
     resetDraftConstraints(state) {
@@ -118,7 +137,7 @@ const topicSlice = createSlice({
       })
       .addCase(createTopicThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Ошибка создания темы';
+        state.error = action.payload ?? "Ошибка создания темы";
       })
       .addCase(fetchTopicThunk.pending, (state) => {
         state.loading = true;
@@ -131,7 +150,7 @@ const topicSlice = createSlice({
       })
       .addCase(fetchTopicThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Ошибка загрузки темы';
+        state.error = action.payload ?? "Ошибка загрузки темы";
       })
       .addCase(saveVoteThunk.pending, (state) => {
         state.loading = true;
@@ -144,7 +163,7 @@ const topicSlice = createSlice({
       })
       .addCase(saveVoteThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Ошибка сохранения голосов';
+        state.error = action.payload ?? "Ошибка сохранения голосов";
       })
       .addCase(updateConstraintsThunk.pending, (state) => {
         state.loading = true;
@@ -157,9 +176,14 @@ const topicSlice = createSlice({
       })
       .addCase(updateConstraintsThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'Ошибка обновления ограничений';
+        state.error = action.payload ?? "Ошибка обновления ограничений";
       }),
 });
 
-export const { setDraftConstraints, resetDraftConstraints, setDraftForm, resetDraftForm } = topicSlice.actions;
+export const {
+  setDraftConstraints,
+  resetDraftConstraints,
+  setDraftForm,
+  resetDraftForm,
+} = topicSlice.actions;
 export default topicSlice.reducer;

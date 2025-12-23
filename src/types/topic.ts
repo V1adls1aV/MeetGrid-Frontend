@@ -49,4 +49,3 @@ export interface VotePayload {
 export interface ConstraintsPayload {
   constraints: Interval[];
 }
-

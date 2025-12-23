@@ -1,10 +1,10 @@
-import { dateFnsLocalizer } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
-import { ru } from 'date-fns/locale/ru';
+import { dateFnsLocalizer } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import { ru } from "date-fns/locale/ru";
 
 const locales = {
   ru,
-  'ru-RU': ru,
+  "ru-RU": ru,
 };
 
 /**
@@ -13,7 +13,7 @@ const locales = {
 export const calendarLocalizer = dateFnsLocalizer({
   format,
   parse,
-  startOfWeek: (date) =>
+  startOfWeek: (date: Date) =>
     startOfWeek(date, {
       weekStartsOn: 1,
     }),
@@ -22,5 +22,3 @@ export const calendarLocalizer = dateFnsLocalizer({
 });
 
 export default calendarLocalizer;
-
-

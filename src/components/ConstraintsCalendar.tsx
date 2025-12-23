@@ -1,13 +1,17 @@
-import React, { useCallback, useMemo } from 'react';
-import { Calendar } from 'react-big-calendar';
-import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
-import { Modal } from 'antd';
-import calendarLocalizer from '../utils/calendarLocalizer';
-import { createEventId, ensureDuration, normalizeDate } from '../utils/calendarEventHelpers';
-import { hasOverlap, showValidationWarning } from '../utils/intervalGuards';
+import React, { useCallback, useMemo } from "react";
+import { Calendar } from "react-big-calendar";
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
+import { Modal } from "antd";
+import calendarLocalizer from "../utils/calendarLocalizer";
+import {
+  createEventId,
+  ensureDuration,
+  normalizeDate,
+} from "../utils/calendarEventHelpers";
+import { hasOverlap, showValidationWarning } from "../utils/intervalGuards";
 
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 
 export interface ConstraintEvent {
   id: string;
@@ -29,24 +33,30 @@ interface DragEventArgs {
 }
 
 interface SlotPayload {
-  action: 'select' | 'click' | 'doubleClick';
+  action: "select" | "click" | "doubleClick";
   start: Date | string;
   end: Date | string;
 }
 
-const DEFAULT_TITLE = 'Окно';
-const DnDCalendar = withDragAndDrop<ConstraintEvent>(Calendar as React.ComponentType<any>);
+const DEFAULT_TITLE = "Окно";
+const DnDCalendar = withDragAndDrop<ConstraintEvent>(
+  Calendar as React.ComponentType<any>,
+);
 
 const calendarMessages = {
-  today: 'Сегодня',
-  previous: 'Назад',
-  next: 'Вперёд',
-  day: 'День',
-  noEventsInRange: 'Нет доступных слотов',
+  today: "Сегодня",
+  previous: "Назад",
+  next: "Вперёд",
+  day: "День",
+  noEventsInRange: "Нет доступных слотов",
   showMore: (total: number) => `+ ещё ${total}`,
 };
 
-const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({ date, events, onEventsChange }) => {
+const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
+  date,
+  events,
+  onEventsChange,
+}) => {
   const scrollToTime = useMemo(() => {
     const anchor = new Date(date);
     anchor.setHours(8, 0, 0, 0);
@@ -55,14 +65,18 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({ date, events,
 
   const updateEvent = useCallback(
     (id: string, nextFields: Partial<ConstraintEvent>) => {
-      onEventsChange(events.map((event) => (event.id === id ? { ...event, ...nextFields } : event)));
+      onEventsChange(
+        events.map((event) =>
+          event.id === id ? { ...event, ...nextFields } : event,
+        ),
+      );
     },
-    [events, onEventsChange]
+    [events, onEventsChange],
   );
 
   const handleSelectSlot = useCallback(
     (slot: SlotPayload) => {
-      if (slot.action !== 'select') {
+      if (slot.action !== "select") {
         return;
       }
 
@@ -71,7 +85,9 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({ date, events,
       const candidate = { start, end };
 
       if (hasOverlap(events, candidate)) {
-        showValidationWarning('Можно выбрать только непересекающиеся интервалы.');
+        showValidationWarning(
+          "Можно выбрать только непересекающиеся интервалы.",
+        );
         return;
       }
 
@@ -85,7 +101,7 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({ date, events,
         },
       ]);
     },
-    [events, onEventsChange]
+    [events, onEventsChange],
   );
 
   const handleEventDrop = useCallback(
@@ -93,13 +109,15 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({ date, events,
       const candidate = { id: event.id, start, end };
 
       if (hasOverlap(events, candidate)) {
-        showValidationWarning('Можно выбрать только непересекающиеся интервалы.');
+        showValidationWarning(
+          "Можно выбрать только непересекающиеся интервалы.",
+        );
         return;
       }
 
       updateEvent(event.id, { start, end });
     },
-    [events, updateEvent]
+    [events, updateEvent],
   );
 
   const handleEventResize = useCallback(
@@ -107,26 +125,29 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({ date, events,
       const candidate = { id: event.id, start, end };
 
       if (hasOverlap(events, candidate)) {
-        showValidationWarning('Можно выбрать только непересекающиеся интервалы.');
+        showValidationWarning(
+          "Можно выбрать только непересекающиеся интервалы.",
+        );
         return;
       }
 
       updateEvent(event.id, { start, end });
     },
-    [events, updateEvent]
+    [events, updateEvent],
   );
 
   const handleSelectEvent = useCallback(
     (event: ConstraintEvent) => {
       Modal.confirm({
-        title: 'Удалить слот?',
-        content: 'Слот исчезнет из списка ограничений.',
-        okText: 'Удалить',
-        cancelText: 'Отмена',
-        onOk: () => onEventsChange(events.filter((item) => item.id !== event.id)),
+        title: "Удалить слот?",
+        content: "Слот исчезнет из списка ограничений.",
+        okText: "Удалить",
+        cancelText: "Отмена",
+        onOk: () =>
+          onEventsChange(events.filter((item) => item.id !== event.id)),
       });
     },
-    [events, onEventsChange]
+    [events, onEventsChange],
   );
 
   return (
@@ -157,5 +178,3 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({ date, events,
 };
 
 export default ConstraintsCalendar;
-
-

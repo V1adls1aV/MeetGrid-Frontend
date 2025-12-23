@@ -1,24 +1,38 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Alert, Button, Spin, Typography } from 'antd';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchTopicThunk, saveVoteThunk } from '../store/topicSlice';
-import { setUsername } from '../store/userSlice';
-import UsernameModal from '../components/UsernameModal';
-import VotingCalendar from '../components/VotingCalendar';
-import StatsLadder from '../components/StatsLadder';
-import CalendarControls from '../components/CalendarControls';
-import { StatsInterval, TopicStats } from '../types/topic';
-import { USER_RESOURCE_ID } from '../constants/votingResources';
-import type { VotingEvent } from '../types/calendar';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { VoteSlot, intervalsToSlots, slotsEqual, slotsToIntervals } from '../utils/voteHelpers';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useParams } from "react-router-dom";
+import { Alert, Button, Spin, Typography } from "antd";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { fetchTopicThunk, saveVoteThunk } from "../store/topicSlice";
+import { setUsername } from "../store/userSlice";
+import UsernameModal from "../components/UsernameModal";
+import VotingCalendar from "../components/VotingCalendar";
+import StatsLadder from "../components/StatsLadder";
+import CalendarControls from "../components/CalendarControls";
+import { StatsInterval, TopicStats } from "../types/topic";
+import { USER_RESOURCE_ID } from "../constants/votingResources";
+import type { VotingEvent } from "../types/calendar";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import {
+  VoteSlot,
+  intervalsToSlots,
+  slotsEqual,
+  slotsToIntervals,
+} from "../utils/voteHelpers";
 
 const { Title, Paragraph, Text } = Typography;
 
 const formatTimeRange = (start: string, end: string) => {
-  const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
-  return `${new Date(start).toLocaleTimeString('ru-RU', options)} — ${new Date(end).toLocaleTimeString('ru-RU', options)}`;
+  const options: Intl.DateTimeFormatOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  return `${new Date(start).toLocaleTimeString("ru-RU", options)} — ${new Date(end).toLocaleTimeString("ru-RU", options)}`;
 };
 
 const mapBlocks = (label: string, intervals: StatsInterval[]) =>
@@ -33,7 +47,10 @@ const statsToEvents = (stats?: TopicStats): VotingEvent[] => {
     return [];
   }
 
-  const build = (resourceId: VotingEvent['resourceId'], intervals: StatsInterval[]) =>
+  const build = (
+    resourceId: VotingEvent["resourceId"],
+    intervals: StatsInterval[],
+  ) =>
     intervals.map((interval, index) => ({
       id: `${resourceId}-${index}-${interval.start}`,
       title: `${interval.people_min}-${interval.people_max} чел.`,
@@ -42,12 +59,16 @@ const statsToEvents = (stats?: TopicStats): VotingEvent[] => {
       resourceId,
     }));
 
-  return [...build('stats50', stats.blocks_50), ...build('stats70', stats.blocks_70), ...build('stats90', stats.blocks_90)];
+  return [
+    ...build("stats50", stats.blocks_50),
+    ...build("stats70", stats.blocks_70),
+    ...build("stats90", stats.blocks_90),
+  ];
 };
 
 const slotToEvent = (slot: VoteSlot): VotingEvent => ({
   id: slot.id,
-  title: 'Моё окно',
+  title: "Моё окно",
   start: new Date(slot.start),
   end: new Date(slot.end),
   resourceId: USER_RESOURCE_ID,
@@ -64,7 +85,9 @@ const findEarliestStatStart = (stats?: TopicStats) => {
     return null;
   }
 
-  const first = pool.reduce((earliest, interval) => (new Date(interval.start) < new Date(earliest.start) ? interval : earliest));
+  const first = pool.reduce((earliest, interval) =>
+    new Date(interval.start) < new Date(earliest.start) ? interval : earliest,
+  );
   return new Date(first.start);
 };
 
@@ -72,8 +95,10 @@ const TopicMainPage: React.FC = () => {
   const { topicId } = useParams<{ topicId: string }>();
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.user.username);
-  const { topic, stats, loading, error } = useAppSelector((state) => state.topic);
-  const [storedName, setStoredName] = useLocalStorage('meetgrid-username', '');
+  const { topic, stats, loading, error } = useAppSelector(
+    (state) => state.topic,
+  );
+  const [storedName, setStoredName] = useLocalStorage("meetgrid-username", "");
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [userSlots, setUserSlots] = useState<VoteSlot[]>([]);
   const [initialSlots, setInitialSlots] = useState<VoteSlot[]>([]);
@@ -135,20 +160,22 @@ const TopicMainPage: React.FC = () => {
       return [];
     }
     return [
-      ...mapBlocks('— 90%', stats.blocks_90),
-      ...mapBlocks('— 70%', stats.blocks_70),
-      ...mapBlocks('— 50%', stats.blocks_50),
+      ...mapBlocks("— 90%", stats.blocks_90),
+      ...mapBlocks("— 70%", stats.blocks_70),
+      ...mapBlocks("— 50%", stats.blocks_50),
     ];
   }, [stats]);
 
   const handleUserEventsChange = useCallback((nextEvents: VotingEvent[]) => {
-    const sorted = [...nextEvents].sort((a, b) => a.start.getTime() - b.start.getTime());
+    const sorted = [...nextEvents].sort(
+      (a, b) => a.start.getTime() - b.start.getTime(),
+    );
     setUserSlots(
       sorted.map((event) => ({
         id: event.id,
         start: event.start.toISOString(),
         end: event.end.toISOString(),
-      }))
+      })),
     );
   }, []);
 
@@ -162,7 +189,7 @@ const TopicMainPage: React.FC = () => {
         topicId,
         username,
         payload: { intervals: slotsToIntervals(userSlots) },
-      })
+      }),
     );
   }, [dispatch, topicId, userSlots, username]);
 
@@ -176,7 +203,7 @@ const TopicMainPage: React.FC = () => {
       setStoredName(trimmed);
       dispatch(setUsername(trimmed));
     },
-    [dispatch, setStoredName]
+    [dispatch, setStoredName],
   );
 
   const refresh = useCallback(async () => {
@@ -189,7 +216,10 @@ const TopicMainPage: React.FC = () => {
     }
   }, [dispatch, topicId, username]);
 
-  const hasChanges = useMemo(() => !slotsEqual(userSlots, initialSlots), [initialSlots, userSlots]);
+  const hasChanges = useMemo(
+    () => !slotsEqual(userSlots, initialSlots),
+    [initialSlots, userSlots],
+  );
 
   // Auto-save effect
   useEffect(() => {
@@ -205,14 +235,41 @@ const TopicMainPage: React.FC = () => {
   }, [userSlots, hasChanges, topicId, username, handleSave]);
 
   return (
-    <section style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <header style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '1rem' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+    <section
+      style={{
+        padding: "2rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1.5rem",
+      }}
+    >
+      <header
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          gap: "1rem",
+        }}
+      >
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+        >
           <Title level={2} style={{ marginBottom: 0 }}>
             Выбор времени
           </Title>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <Button type="link" onClick={refresh} disabled={!username || !topicId}>
+          <div
+            style={{
+              display: "flex",
+              gap: "1rem",
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              type="link"
+              onClick={refresh}
+              disabled={!username || !topicId}
+            >
               Обновить данные
             </Button>
             <Text type="secondary">Колонки: 50% • 70% • 90% • Мой выбор</Text>
@@ -222,12 +279,19 @@ const TopicMainPage: React.FC = () => {
       </header>
 
       {loading && (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div style={{ display: "flex", justifyContent: "center" }}>
           <Spin />
         </div>
       )}
 
-      {error && <Alert message="Не удалось загрузить данные" description={error} type="error" showIcon />}
+      {error && (
+        <Alert
+          message="Не удалось загрузить данные"
+          description={error}
+          type="error"
+          showIcon
+        />
+      )}
 
       <VotingCalendar
         date={currentDate}
@@ -239,7 +303,9 @@ const TopicMainPage: React.FC = () => {
       />
 
       <div>
-        <Paragraph style={{ marginBottom: '0.5rem' }}>Лучшие окна по статистике:</Paragraph>
+        <Paragraph style={{ marginBottom: "0.5rem" }}>
+          Лучшие окна по статистике:
+        </Paragraph>
         <StatsLadder blocks={ladderBlocks} />
       </div>
 

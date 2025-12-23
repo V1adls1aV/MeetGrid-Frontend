@@ -1,4 +1,4 @@
-import { Interval } from '../types/topic';
+import { Interval } from "../types/topic";
 
 export interface VoteSlot {
   id: string;
@@ -20,6 +20,8 @@ export const slotsToIntervals = (slots: VoteSlot[]): Interval[] =>
   }));
 
 export const slotsEqual = (first: VoteSlot[], second: VoteSlot[]) =>
-  first.length === second.length && first.every((slot, index) => slot.start === second[index].start && slot.end === second[index].end);
-
-
+  first.length === second.length &&
+  first.every(
+    (slot, index) =>
+      slot.start === second[index].start && slot.end === second[index].end,
+  );

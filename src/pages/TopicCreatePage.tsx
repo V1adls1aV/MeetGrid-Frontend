@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Form, Input, Button, Alert, Typography } from 'antd';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { createTopicThunk, setDraftForm } from '../store/topicSlice';
-import { setUsername } from '../store/userSlice';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Form, Input, Button, Alert, Typography } from "antd";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { createTopicThunk, setDraftForm } from "../store/topicSlice";
+import { setUsername } from "../store/userSlice";
 
 const { Paragraph, Text } = Typography;
 
@@ -17,7 +17,8 @@ const TopicCreatePage: React.FC = () => {
   const [form] = Form.useForm<FormValues>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { loading, error, inviteLink, draftConstraints, draftForm } = useAppSelector((state) => state.topic);
+  const { loading, error, inviteLink, draftConstraints, draftForm } =
+    useAppSelector((state) => state.topic);
 
   useEffect(() => {
     form.setFieldsValue(draftForm);
@@ -32,39 +33,48 @@ const TopicCreatePage: React.FC = () => {
           description: values.description?.trim() ?? null,
           constraints: draftConstraints,
         },
-      })
+      }),
     );
   };
 
-  const handleValuesChange = (_: Partial<FormValues>, allValues: FormValues) => {
+  const handleValuesChange = (
+    _: Partial<FormValues>,
+    allValues: FormValues,
+  ) => {
     dispatch(
       setDraftForm({
-        topicName: allValues.topicName ?? '',
-        adminName: allValues.adminName ?? '',
-        description: allValues.description ?? '',
-      })
+        topicName: allValues.topicName ?? "",
+        adminName: allValues.adminName ?? "",
+        description: allValues.description ?? "",
+      }),
     );
   };
 
   const handleOpenConstraints = () => {
-    navigate('/topic/new/constraints');
+    navigate("/topic/new/constraints");
   };
 
   return (
-    <section style={{ padding: '2rem', maxWidth: 540 }}>
+    <section style={{ padding: "2rem", maxWidth: 540 }}>
       <Typography.Title level={2}>Создать опрос</Typography.Title>
-      <Form form={form} layout="vertical" onFinish={handleFinish} onValuesChange={handleValuesChange} initialValues={draftForm}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleFinish}
+        onValuesChange={handleValuesChange}
+        initialValues={draftForm}
+      >
         <Form.Item
           name="topicName"
           label="Название"
-          rules={[{ required: true, message: 'Введите название' }]}
+          rules={[{ required: true, message: "Введите название" }]}
         >
           <Input placeholder="Название встречи" />
         </Form.Item>
         <Form.Item
           name="adminName"
           label="Ваше имя"
-          rules={[{ required: true, message: 'Введите имя организатора' }]}
+          rules={[{ required: true, message: "Введите имя организатора" }]}
         >
           <Input placeholder="Например, Владислав" />
         </Form.Item>
@@ -72,10 +82,19 @@ const TopicCreatePage: React.FC = () => {
           <Input.TextArea rows={3} placeholder="Цель встречи" />
         </Form.Item>
         <Form.Item label="Ограничения">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "1rem",
+              flexWrap: "wrap",
+            }}
+          >
             <Button onClick={handleOpenConstraints}>Выбрать ограничения</Button>
-            <Text type={draftConstraints.length ? 'success' : 'secondary'}>
-              {draftConstraints.length ? `${draftConstraints.length} слотов выбрано` : 'Слоты пока не выбраны'}
+            <Text type={draftConstraints.length ? "success" : "secondary"}>
+              {draftConstraints.length
+                ? `${draftConstraints.length} слотов выбрано`
+                : "Слоты пока не выбраны"}
             </Text>
           </div>
         </Form.Item>
@@ -91,8 +110,13 @@ const TopicCreatePage: React.FC = () => {
         </Form.Item>
       </Form>
       {inviteLink && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <Paragraph copyable={{ text: inviteLink }} style={{ marginBottom: 0 }}>
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+        >
+          <Paragraph
+            copyable={{ text: inviteLink }}
+            style={{ marginBottom: 0 }}
+          >
             Ссылка для участников: <a href={inviteLink}>{inviteLink}</a>
           </Paragraph>
         </div>

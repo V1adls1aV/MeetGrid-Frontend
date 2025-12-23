@@ -1,24 +1,34 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Alert, Button, Typography } from 'antd';
-import StatsLadder from '../components/StatsLadder';
-import ConstraintsCalendar, { ConstraintEvent } from '../components/ConstraintsCalendar';
-import CalendarControls from '../components/CalendarControls';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchTopicThunk, updateConstraintsThunk } from '../store/topicSlice';
-import { Interval } from '../types/topic';
-import UsernameModal from '../components/UsernameModal';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { setUsername } from '../store/userSlice';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Alert, Button, Typography } from "antd";
+import StatsLadder from "../components/StatsLadder";
+import ConstraintsCalendar, {
+  ConstraintEvent,
+} from "../components/ConstraintsCalendar";
+import CalendarControls from "../components/CalendarControls";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { fetchTopicThunk, updateConstraintsThunk } from "../store/topicSlice";
+import { Interval } from "../types/topic";
+import UsernameModal from "../components/UsernameModal";
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import { setUsername } from "../store/userSlice";
 
 const { Title, Paragraph } = Typography;
 
 const formatTimeRange = (start: string, end: string) =>
-  `${new Date(start).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} — ${new Date(
-    end
-  ).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`;
+  `${new Date(start).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })} — ${new Date(
+    end,
+  ).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}`;
 
-const buildBlocks = (label: string, intervals: { start: string; end: string; people_min: number; people_max: number }[]) =>
+const buildBlocks = (
+  label: string,
+  intervals: {
+    start: string;
+    end: string;
+    people_min: number;
+    people_max: number;
+  }[],
+) =>
   intervals.map((interval, index) => ({
     key: `${label}-${index}-${interval.start}`,
     label: `${interval.people_min}-${interval.people_max} ${label}`,
@@ -30,7 +40,7 @@ const buildBlocks = (label: string, intervals: { start: string; end: string; peo
  */
 const intervalToEvent = (interval: Interval): ConstraintEvent => ({
   id: `${interval.start}-${interval.end}`,
-  title: 'Окно',
+  title: "Окно",
   start: new Date(interval.start),
   end: new Date(interval.end),
 });
@@ -46,20 +56,27 @@ const eventToInterval = (event: ConstraintEvent): Interval => ({
 /**
  * Creates a shallow copy to avoid mutating data that came from Redux.
  */
-const cloneIntervals = (intervals?: Interval[]) => intervals?.map((interval) => ({ ...interval })) ?? [];
+const cloneIntervals = (intervals?: Interval[]) =>
+  intervals?.map((interval) => ({ ...interval })) ?? [];
 
 /**
  * Detects whether two constraint lists represent identical payloads.
  */
 const constraintsEqual = (a: Interval[], b: Interval[]) =>
-  a.length === b.length && a.every((interval, index) => interval.start === b[index].start && interval.end === b[index].end);
+  a.length === b.length &&
+  a.every(
+    (interval, index) =>
+      interval.start === b[index].start && interval.end === b[index].end,
+  );
 
 const TopicAdminPage: React.FC = () => {
   const { topicId } = useParams<{ topicId: string }>();
   const dispatch = useAppDispatch();
-  const { topic, stats, loading, error } = useAppSelector((state) => state.topic);
+  const { topic, stats, loading, error } = useAppSelector(
+    (state) => state.topic,
+  );
   const username = useAppSelector((state) => state.user.username);
-  const [storedName, setStoredName] = useLocalStorage('meetgrid-username', '');
+  const [storedName, setStoredName] = useLocalStorage("meetgrid-username", "");
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [localConstraints, setLocalConstraints] = useState<Interval[]>([]);
 
@@ -86,10 +103,16 @@ const TopicAdminPage: React.FC = () => {
       return [];
     }
 
-    return [...buildBlocks('— 90%', stats.blocks_90), ...buildBlocks('— 70%', stats.blocks_70)];
+    return [
+      ...buildBlocks("— 90%", stats.blocks_90),
+      ...buildBlocks("— 70%", stats.blocks_70),
+    ];
   }, [stats]);
 
-  const calendarEvents = useMemo(() => localConstraints.map(intervalToEvent), [localConstraints]);
+  const calendarEvents = useMemo(
+    () => localConstraints.map(intervalToEvent),
+    [localConstraints],
+  );
 
   const hasChanges = useMemo(() => {
     if (!topic?.constraints) {
@@ -100,7 +123,9 @@ const TopicAdminPage: React.FC = () => {
   }, [localConstraints, topic?.constraints]);
 
   const handleEventsChange = useCallback((next: ConstraintEvent[]) => {
-    const sorted = [...next].sort((first, second) => first.start.getTime() - second.start.getTime());
+    const sorted = [...next].sort(
+      (first, second) => first.start.getTime() - second.start.getTime(),
+    );
     setLocalConstraints(sorted.map(eventToInterval));
   }, []);
 
@@ -114,7 +139,7 @@ const TopicAdminPage: React.FC = () => {
         topicId,
         username,
         payload: { constraints: localConstraints },
-      })
+      }),
     );
   }, [dispatch, localConstraints, topicId, username]);
 
@@ -128,17 +153,32 @@ const TopicAdminPage: React.FC = () => {
       setStoredName(trimmed);
       dispatch(setUsername(trimmed));
     },
-    [dispatch, setStoredName]
+    [dispatch, setStoredName],
   );
 
   const canSave = Boolean(topicId && username && hasChanges && !loading);
 
   return (
-    <section style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <header style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+    <section
+      style={{
+        padding: "2rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1.5rem",
+      }}
+    >
+      <header
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "1rem",
+        }}
+      >
         <div>
-          <Title level={2} style={{ marginBottom: '0.25rem' }}>
-            {topic?.topic_name ?? 'Администрирование'}
+          <Title level={2} style={{ marginBottom: "0.25rem" }}>
+            {topic?.topic_name ?? "Администрирование"}
           </Title>
           {topic && (
             <Paragraph style={{ margin: 0 }}>
@@ -149,12 +189,23 @@ const TopicAdminPage: React.FC = () => {
         <CalendarControls date={currentDate} onChange={setCurrentDate} />
       </header>
 
-      {error && <Alert message="Ошибка" description={error} type="error" showIcon />}
+      {error && (
+        <Alert message="Ошибка" description={error} type="error" showIcon />
+      )}
 
-      <ConstraintsCalendar date={currentDate} events={calendarEvents} onEventsChange={handleEventsChange} />
+      <ConstraintsCalendar
+        date={currentDate}
+        events={calendarEvents}
+        onEventsChange={handleEventsChange}
+      />
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button type="primary" onClick={handleSave} disabled={!canSave} loading={loading}>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <Button
+          type="primary"
+          onClick={handleSave}
+          disabled={!canSave}
+          loading={loading}
+        >
           Сохранить изменения
         </Button>
       </div>

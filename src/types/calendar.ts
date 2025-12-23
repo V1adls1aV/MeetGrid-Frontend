@@ -1,4 +1,4 @@
-import { VotingResourceId } from '../constants/votingResources';
+import { VotingResourceId } from "../constants/votingResources";
 
 export interface VotingEvent {
   id: string;
@@ -10,5 +10,3 @@ export interface VotingEvent {
 }
 
 export type { VotingResourceId };
-
-

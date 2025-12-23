@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 const safeRead = (key: string) => {
   try {
@@ -9,7 +9,9 @@ const safeRead = (key: string) => {
 };
 
 export const useLocalStorage = (key: string, initialValue: string) => {
-  const [value, setValue] = useState<string>(() => safeRead(key) ?? initialValue);
+  const [value, setValue] = useState<string>(
+    () => safeRead(key) ?? initialValue,
+  );
 
   useEffect(() => {
     try {

@@ -1,5 +1,5 @@
-import { setDayStart, setDayEnd } from '../constants/votingResources';
-import { Interval } from '../types/topic';
+import { setDayStart, setDayEnd } from "../constants/votingResources";
+import { Interval } from "../types/topic";
 
 // Internal type for calculations
 interface TimeRange {
@@ -16,7 +16,9 @@ function mergeIntervals(intervals: TimeRange[]): TimeRange[] {
   if (!intervals.length) return [];
 
   // Sort by start time
-  const sorted = [...intervals].sort((a, b) => a.start.getTime() - b.start.getTime());
+  const sorted = [...intervals].sort(
+    (a, b) => a.start.getTime() - b.start.getTime(),
+  );
 
   const merged: TimeRange[] = [sorted[0]];
 
@@ -52,7 +54,10 @@ function mergeIntervals(intervals: TimeRange[]): TimeRange[] {
  *    - Constraint[i].End -> Constraint[i+1].Start
  *    - Last Constraint End -> EndOfDay
  */
-export const getBlockedIntervals = (date: Date, constraints: Interval[]): TimeRange[] => {
+export const getBlockedIntervals = (
+  date: Date,
+  constraints: Interval[],
+): TimeRange[] => {
   if (!constraints || constraints.length === 0) {
     return [];
   }
@@ -69,7 +74,10 @@ export const getBlockedIntervals = (date: Date, constraints: Interval[]): TimeRa
     const cEnd = new Date(c.end);
 
     // Skip if completely outside the day
-    if (cEnd.getTime() <= dayStart.getTime() || cStart.getTime() >= dayEnd.getTime()) {
+    if (
+      cEnd.getTime() <= dayStart.getTime() ||
+      cStart.getTime() >= dayEnd.getTime()
+    ) {
       continue;
     }
 
@@ -119,7 +127,7 @@ export const getBlockedIntervals = (date: Date, constraints: Interval[]): TimeRa
   return blocked;
 };
 
-export type VisualPosition = 'start' | 'middle' | 'end' | 'single';
+export type VisualPosition = "start" | "middle" | "end" | "single";
 
 export interface BackgroundEvent {
   id: string;
@@ -144,17 +152,17 @@ export interface BackgroundEvent {
  */
 export const generateBackgroundEvents = (
   blockedIntervals: TimeRange[],
-  resourceIds: string[]
+  resourceIds: string[],
 ): BackgroundEvent[] => {
   const events: BackgroundEvent[] = [];
   const count = resourceIds.length;
 
   blockedIntervals.forEach((interval, i) => {
     resourceIds.forEach((rId, rIndex) => {
-      let position: VisualPosition = 'middle';
-      if (count === 1) position = 'single';
-      else if (rIndex === 0) position = 'start';
-      else if (rIndex === count - 1) position = 'end';
+      let position: VisualPosition = "middle";
+      if (count === 1) position = "single";
+      else if (rIndex === 0) position = "start";
+      else if (rIndex === count - 1) position = "end";
 
       events.push({
         id: `bg-blocked-${i}-${rId}-${rIndex}`,
@@ -162,7 +170,7 @@ export const generateBackgroundEvents = (
         end: interval.end,
         isBackground: true,
         resourceId: rId,
-        title: '',
+        title: "",
         visualPosition: position,
       });
     });

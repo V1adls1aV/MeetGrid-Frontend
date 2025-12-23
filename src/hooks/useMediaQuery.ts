@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 /**
  * Следит за media query и синхронно сообщает, активен ли breakpoint.
  */
 const useMediaQuery = (query: string): boolean => {
-  const getMatch = () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false);
+  const getMatch = () =>
+    typeof window !== "undefined" ? window.matchMedia(query).matches : false;
   const [matches, setMatches] = useState<boolean>(getMatch);
 
   useEffect(() => {
@@ -12,13 +13,11 @@ const useMediaQuery = (query: string): boolean => {
     const handleChange = () => setMatches(media.matches);
 
     handleChange();
-    media.addEventListener('change', handleChange);
-    return () => media.removeEventListener('change', handleChange);
+    media.addEventListener("change", handleChange);
+    return () => media.removeEventListener("change", handleChange);
   }, [query]);
 
   return matches;
 };
 
 export default useMediaQuery;
-
-

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Modal, Input } from 'antd';
+import React, { useState } from "react";
+import { Modal, Input } from "antd";
 
 interface Props {
   visible: boolean;
@@ -8,7 +8,7 @@ interface Props {
 }
 
 const UsernameModal: React.FC<Props> = ({ visible, onConfirm, onCancel }) => {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
 
   return (
     <Modal
@@ -18,7 +18,11 @@ const UsernameModal: React.FC<Props> = ({ visible, onConfirm, onCancel }) => {
       onCancel={onCancel}
       okButtonProps={{ disabled: !name.trim() }}
     >
-      <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Например, Гриша" />
+      <Input
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        placeholder="Например, Гриша"
+      />
     </Modal>
   );
 };

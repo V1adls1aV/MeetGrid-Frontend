@@ -1,10 +1,10 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import LandingPage from '../pages/LandingPage';
-import TopicCreatePage from '../pages/TopicCreatePage';
-import TopicConstraintsPage from '../pages/TopicConstraintsPage';
-import TopicMainPage from '../pages/TopicMainPage';
-import TopicAdminPage from '../pages/TopicAdminPage';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import LandingPage from "../pages/LandingPage";
+import TopicCreatePage from "../pages/TopicCreatePage";
+import TopicConstraintsPage from "../pages/TopicConstraintsPage";
+import TopicMainPage from "../pages/TopicMainPage";
+import TopicAdminPage from "../pages/TopicAdminPage";
 
 const AppRoutes: React.FC = () => (
   <Routes>
