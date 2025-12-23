@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Calendar } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import { Spin } from "antd";
@@ -28,6 +28,12 @@ import {
 import type { VotingEvent } from "../types/calendar";
 import type { Interval } from "../types/topic";
 import VotingCalendarEvent from "./VotingCalendarEvent";
+import EventEditModal from "./EventEditModal";
+import {
+  hasOverlap,
+  fitsConstraints,
+  showValidationWarning,
+} from "../utils/intervalGuards";
 import styles from "./VotingCalendar.module.css";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -88,12 +94,44 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
     ) as unknown as CalendarRenderEvent[];
   }, [date, constraints, layoutResources]);
 
+  const [editingEvent, setEditingEvent] = useState<VotingEvent | null>(null);
+
   const {
     handleSelectSlot,
     handleEventDrop,
     handleEventResize,
     handleSelectEvent,
-  } = useCalendarHandlers({ userEvents, onUserEventsChange, constraints });
+  } = useCalendarHandlers({
+    userEvents,
+    onUserEventsChange,
+    constraints,
+    onEditEvent: setEditingEvent,
+  });
+
+  const handleSaveEvent = (id: string, start: Date, end: Date) => {
+    const candidate = { id, start, end };
+    const otherEvents = userEvents.filter((e) => e.id !== id);
+
+    if (hasOverlap(otherEvents, candidate)) {
+      showValidationWarning("Интервал пересекается с существующими слотами.");
+      return;
+    }
+
+    if (!fitsConstraints(candidate, constraints)) {
+      showValidationWarning("Интервал должен лежать внутри доступных окон.");
+      return;
+    }
+
+    onUserEventsChange(
+      userEvents.map((e) => (e.id === id ? { ...e, start, end } : e)),
+    );
+    setEditingEvent(null);
+  };
+
+  const handleDeleteEvent = (id: string) => {
+    onUserEventsChange(userEvents.filter((e) => e.id !== id));
+    setEditingEvent(null);
+  };
 
   const scrollToTime = useMemo(() => {
     const anchor = new Date(date);
@@ -186,8 +224,12 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
         onEventDrop={handleEventDrop}
         onEventResize={handleEventResize}
         onSelectEvent={handleSelectEvent}
-        draggableAccessor={(event) => Boolean(event.isEditable)}
-        resizableAccessor={(event) => Boolean(event.isEditable)}
+        draggableAccessor={(event) =>
+          Boolean(event.isEditable) && (!isCompact || false)
+        }
+        resizableAccessor={(event) =>
+          Boolean(event.isEditable) && (!isCompact || false)
+        }
         eventPropGetter={eventPropGetter}
         components={calendarComponents}
         style={{ height: "100%" }}
@@ -197,6 +239,13 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
           <Spin size="large" />
         </div>
       )}
+      <EventEditModal
+        visible={!!editingEvent}
+        event={editingEvent}
+        onCancel={() => setEditingEvent(null)}
+        onSave={handleSaveEvent}
+        onDelete={handleDeleteEvent}
+      />
     </div>
   );
 };

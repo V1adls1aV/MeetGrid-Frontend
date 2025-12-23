@@ -19,12 +19,14 @@ interface UseCalendarHandlersProps {
   userEvents: VotingEvent[];
   onUserEventsChange: (next: VotingEvent[]) => void;
   constraints: Interval[];
+  onEditEvent: (event: VotingEvent) => void;
 }
 
 export const useCalendarHandlers = ({
   userEvents,
   onUserEventsChange,
   constraints,
+  onEditEvent,
 }: UseCalendarHandlersProps) => {
   const userTimedEvents = userEvents.map(({ id, start, end }) => ({
     id,
@@ -86,11 +88,18 @@ export const useCalendarHandlers = ({
     ({ event, start, end }: any) => {
       if (event.resourceId !== USER_RESOURCE_ID) return;
 
-      validateAndExecute({ id: event.id, start: start as Date, end: end as Date }, () => {
-        onUserEventsChange(
-          userEvents.map((e) => (e.id === event.id ? { ...e, start: start as Date, end: end as Date } : e)),
-        );
-      });
+      validateAndExecute(
+        { id: event.id, start: start as Date, end: end as Date },
+        () => {
+          onUserEventsChange(
+            userEvents.map((e) =>
+              e.id === event.id
+                ? { ...e, start: start as Date, end: end as Date }
+                : e,
+            ),
+          );
+        },
+      );
     },
     [userEvents, onUserEventsChange, validateAndExecute],
   );
@@ -98,17 +107,9 @@ export const useCalendarHandlers = ({
   const handleSelectEvent = useCallback(
     (event: any) => {
       if (event.isBackground || event.resourceId !== USER_RESOURCE_ID) return;
-
-      Modal.confirm({
-        title: "Удалить слот?",
-        content: "Он исчезнет из вашего голосования.",
-        okText: "Удалить",
-        cancelText: "Отмена",
-        onOk: () =>
-          onUserEventsChange(userEvents.filter((item) => item.id !== event.id)),
-      });
+      onEditEvent(event);
     },
-    [onUserEventsChange, userEvents],
+    [onEditEvent],
   );
 
   return {
