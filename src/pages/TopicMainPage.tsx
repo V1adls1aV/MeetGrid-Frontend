@@ -106,10 +106,24 @@ const TopicMainPage: React.FC = () => {
   const initialDateApplied = useRef(false);
   const dataLoadedRef = useRef(false);
 
+  // Draft key based on topic and username
+  const draftKey = useMemo(
+    () =>
+      topicId && username ? `meetgrid-draft-${topicId}-${username}` : null,
+    [topicId, username],
+  );
+
   // Reset data loaded flag when context changes
   useEffect(() => {
     dataLoadedRef.current = false;
   }, [topicId, username]);
+
+  // Save slots to local draft whenever they change
+  useEffect(() => {
+    if (dataLoadedRef.current && draftKey && userSlots) {
+      localStorage.setItem(draftKey, JSON.stringify(userSlots));
+    }
+  }, [draftKey, userSlots]);
 
   useEffect(() => {
     if (storedName && storedName !== username) {
@@ -136,12 +150,31 @@ const TopicMainPage: React.FC = () => {
     // Always update baseline to detect changes against server state
     setInitialSlots(slots);
 
-    // Only update user slots on initial load to avoid overwriting ongoing edits
+    // Only initialize once per session (draft or server)
     if (!dataLoadedRef.current) {
-      setUserSlots(slots);
-      dataLoadedRef.current = true;
+      // Try to load draft first
+      let draftSlots: VoteSlot[] | null = null;
+      if (draftKey) {
+        try {
+          const stored = localStorage.getItem(draftKey);
+          if (stored) {
+            draftSlots = JSON.parse(stored);
+          }
+        } catch (e) {
+          console.error("Failed to parse draft", e);
+        }
+      }
+
+      if (draftSlots) {
+        setUserSlots(draftSlots);
+        dataLoadedRef.current = true;
+      } else if (topic) {
+        // Fallback to server data if no draft, but only if topic is loaded
+        setUserSlots(slots);
+        dataLoadedRef.current = true;
+      }
     }
-  }, [topic?.votes, username]);
+  }, [topic?.votes, username, draftKey, topic]);
 
   useEffect(() => {
     if (initialDateApplied.current) {
