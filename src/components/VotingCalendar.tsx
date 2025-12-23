@@ -257,14 +257,9 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
         !isTouchingBottom && (position === "start" || position === "single")
           ? radius
           : 0;
-      const topRight =
-        !isTouchingTop && (position === "end" || position === "single")
-          ? radius
-          : 0;
+      const topRight = position === "end" || position === "single" ? radius : 0;
       const bottomRight =
-        !isTouchingBottom && (position === "end" || position === "single")
-          ? radius
-          : 0;
+        position === "end" || position === "single" ? radius : 0;
 
       if (topLeft) style.borderTopLeftRadius = topLeft;
       if (bottomLeft) style.borderBottomLeftRadius = bottomLeft;
