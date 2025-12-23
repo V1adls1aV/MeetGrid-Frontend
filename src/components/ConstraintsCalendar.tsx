@@ -163,8 +163,8 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
       toolbar={false}
       selectable
       resizable
-      step={30}
-      timeslots={2}
+      step={15}
+      timeslots={4}
       scrollToTime={scrollToTime}
       onSelectSlot={handleSelectSlot}
       onEventDrop={handleEventDrop}

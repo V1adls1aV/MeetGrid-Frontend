@@ -234,7 +234,7 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
   const eventPropGetter = useCallback((event: any) => {
     if (event.isBackground) {
       const position = event.visualPosition as VisualPosition;
-      const radius = 20;
+      const radius = 10;
 
       // Ensure that event start/end match day boundaries to avoid rounding at the very top/bottom
       const dayStart = setDayStart(event.start);
@@ -320,8 +320,8 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
         toolbar={false}
         selectable
         resizable
-        step={30}
-        timeslots={2}
+        step={15}
+        timeslots={4}
         scrollToTime={scrollToTime}
         resources={layoutResources}
         resourceIdAccessor={(resource: any) => resource.id}

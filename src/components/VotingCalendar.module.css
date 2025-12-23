@@ -1,8 +1,8 @@
 .calendarShell {
   height: 520px;
   --calendar-card-padding: 8px;
-  --calendar-card-radius: 5px;
-  --calendar-card-shadow: 0 8px 24px rgba(23, 26, 43, 0.12);
+  --calendar-card-radius: 10px;
+  --calendar-card-shadow: 0 0 0 rgba(23, 26, 43, 0.12);
   --calendar-gutter-width: 52px;
   --calendar-column-gap: 6px;
   --calendar-card-border: #000000;
@@ -83,17 +83,15 @@
 
 /* Основное тело с сеткой */
 .calendarShell :global(.rbc-time-content) {
-  border-top: 1px solid #edf0fb; /* Единственная верхняя граница, отделяющая шапку */
-  border-bottom: none;
-  border-left: none;
-  border-right: none;
+  border: none;
   gap: 0;
 }
 
 /* Колонки ресурсов */
 .calendarShell :global(.rbc-time-column) {
-  border: none; /* Убирает вертикальные линии между ресурсами */
+  border: none;
   padding: 0;
+  margin: 0;
 }
 
 /* Горизонтальные линии сетки: оставляем только часовые линии */
@@ -111,14 +109,42 @@
   border-bottom: 1px solid #f0f2fb;
 }
 
-/* Фикс для первой линии, чтобы не двоилась с border-top контейнера
-.calendarShell :global(.rbc-timeslot-group:first-child) {
-    border-top: none; 
-} */
-
 /* Убрать чередование цветов, если есть, или сделать его очень тонким */
 .calendarShell :global(.rbc-day-slot .rbc-time-slot:nth-child(even)) {
   background: transparent;
+}
+
+.calendarShell :global(.rbc-current-time-indicator) {
+  background-color: #dc303084;
+  z-index: 10;
+}
+
+.calendarShell
+  :global(
+    .rbc-time-content
+      .rbc-day-slot.rbc-time-column:nth-child(2)
+      .rbc-current-time-indicator::before
+  ) {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: #ff3b30;
+  border-radius: 10px;
+  transform: translate(-25%, -51%);
+}
+
+/* Сдвигаем запись время на уровень линии */
+.calendarShell :global(.rbc-timeslot-group .rbc-time-slot .rbc-label) {
+  display: block;
+  transform: translateY(-50%);
+}
+
+.calendarShell
+  :global(.rbc-timeslot-group:first-of-type .rbc-time-slot .rbc-label) {
+  content-visibility: hidden;
 }
 
 /* --- Стили событий (Карточки) --- */
@@ -148,10 +174,17 @@
   display: none !important;
 }
 
-.backgroundEvent {
-  padding: 0 !important;
-  z-index: 0;
+/* Background events */
+
+.calendarShell :global(.rbc-background-event .rbc-event-content) {
+  content-visibility: hidden;
 }
+
+.calendarShell :global(.rbc-background-event .rbc-event-label) {
+  content-visibility: hidden;
+}
+
+/* Font styles */
 
 .calendarShell :global(.rbc-event-content) {
   width: 100%;
@@ -199,17 +232,9 @@
   width: 40px;
 }
 
-.compact :global(.rbc-time-column) {
-  padding: 0 2px;
-}
-
 .compact :global(.rbc-day-slot .rbc-event) {
   width: 100%;
   margin-left: 0;
-}
-
-.compact :global(.rbc-time-content) {
-  gap: 2px;
 }
 
 .compact .foregroundEvent {

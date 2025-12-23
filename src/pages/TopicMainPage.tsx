@@ -257,23 +257,6 @@ const TopicMainPage: React.FC = () => {
           <Title level={2} style={{ marginBottom: 0 }}>
             Выбор времени
           </Title>
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            <Button
-              type="link"
-              onClick={refresh}
-              disabled={!username || !topicId}
-            >
-              Обновить данные
-            </Button>
-            <Text type="secondary">Колонки: 50% • 70% • 90% • Мой выбор</Text>
-          </div>
         </div>
         <CalendarControls date={currentDate} onChange={setCurrentDate} />
       </header>
