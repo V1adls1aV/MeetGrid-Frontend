@@ -2,7 +2,10 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Calendar } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import { Spin } from "antd";
-import calendarLocalizer from "../utils/calendarLocalizer";
+import {
+  calendarLocalizer,
+  calendarMessages,
+} from "../utils/calendarLocalizer";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
@@ -59,15 +62,6 @@ const DEFAULT_TITLE = "Окно";
 const DnDCalendar = withDragAndDrop<ConstraintEvent>(
   Calendar as React.ComponentType<any>,
 );
-
-const calendarMessages = {
-  today: "Сегодня",
-  previous: "Назад",
-  next: "Вперёд",
-  day: "День",
-  noEventsInRange: "Нет доступных слотов",
-  showMore: (total: number) => `+ ещё ${total}`,
-};
 
 const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
   date,

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Alert, Button, Typography } from "antd";
-import StatsLadder from "../components/StatsLadder";
+import StatsGrid from "../components/StatsGrid";
 import ConstraintsCalendar, {
   ConstraintEvent,
 } from "../components/ConstraintsCalendar";
@@ -14,26 +14,6 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import { setUsername } from "../store/userSlice";
 
 const { Title, Paragraph } = Typography;
-
-const formatTimeRange = (start: string, end: string) =>
-  `${new Date(start).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })} — ${new Date(
-    end,
-  ).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}`;
-
-const buildBlocks = (
-  label: string,
-  intervals: {
-    start: string;
-    end: string;
-    people_min: number;
-    people_max: number;
-  }[],
-) =>
-  intervals.map((interval, index) => ({
-    key: `${label}-${index}-${interval.start}`,
-    label: `${interval.people_min}-${interval.people_max} ${label}`,
-    range: formatTimeRange(interval.start, interval.end),
-  }));
 
 /**
  * Converts backend intervals to calendar events so drag handlers stay simple.
@@ -98,17 +78,6 @@ const TopicAdminPage: React.FC = () => {
     }
   }, [topic?.constraints]);
 
-  const ladderBlocks = useMemo(() => {
-    if (!stats) {
-      return [];
-    }
-
-    return [
-      ...buildBlocks("— 90%", stats.blocks_90),
-      ...buildBlocks("— 70%", stats.blocks_70),
-    ];
-  }, [stats]);
-
   const calendarEvents = useMemo(
     () => localConstraints.map(intervalToEvent),
     [localConstraints],
@@ -159,71 +128,109 @@ const TopicAdminPage: React.FC = () => {
   const canSave = Boolean(topicId && username && hasChanges && !loading);
 
   return (
-    <section
+    <div
       style={{
-        padding: "2rem",
         display: "flex",
-        flexDirection: "column",
-        gap: "1.5rem",
+        justifyContent: "center",
+        height: "100dvh",
+        backgroundColor: "#f5f5f5",
+        overflow: "hidden",
       }}
     >
-      <header
+      <section
         style={{
+          width: "100%",
+          maxWidth: "1024px",
+          padding: "1.5rem",
           display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
+          flexDirection: "column",
           gap: "1rem",
+          height: "100%",
         }}
       >
-        <div>
-          <Title level={2} style={{ marginBottom: "0.25rem" }}>
-            {topic?.topic_name ?? "Администрирование"}
-          </Title>
-          {topic && (
-            <Paragraph style={{ margin: 0 }}>
-              Админ: <strong>{topic.admin_name}</strong>
-            </Paragraph>
-          )}
-        </div>
-        <CalendarControls date={currentDate} onChange={setCurrentDate} />
-      </header>
-
-      {error && (
-        <Alert message="Ошибка" description={error} type="error" showIcon />
-      )}
-
-      <ConstraintsCalendar
-        date={currentDate}
-        events={calendarEvents}
-        onEventsChange={handleEventsChange}
-        loading={loading}
-      />
-
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <Button
-          type="primary"
-          onClick={handleSave}
-          disabled={!canSave}
-          loading={loading}
+        <header
+          style={{
+            flexShrink: 0,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "1rem",
+            background: "#fff",
+            padding: "1rem",
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          }}
         >
-          Сохранить изменения
-        </Button>
-      </div>
+          <div>
+            <Title level={3} style={{ marginBottom: "0.25rem" }}>
+              {topic?.topic_name ?? "Администрирование"}
+            </Title>
+            {topic && (
+              <Paragraph style={{ margin: 0 }}>
+                Админ: <strong>{topic.admin_name}</strong>
+              </Paragraph>
+            )}
+          </div>
+          <CalendarControls date={currentDate} onChange={setCurrentDate} />
+        </header>
 
-      <div>
-        <Paragraph>Статистика ограничения: отображается топ-2 блока.</Paragraph>
-        <StatsLadder blocks={ladderBlocks} />
-      </div>
+        {error && (
+          <Alert
+            message="Ошибка"
+            description={error}
+            type="error"
+            showIcon
+            style={{ borderRadius: "8px", flexShrink: 0 }}
+          />
+        )}
 
-      <UsernameModal
-        visible={!username}
-        onConfirm={handleNameConfirm}
-        onCancel={() => {
-          // держим модалку открытой до ввода имени
-        }}
-      />
-    </section>
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.5rem",
+            minHeight: 0,
+            paddingBottom: "2rem",
+          }}
+        >
+          <div style={{ height: "600px", flexShrink: 0 }}>
+            <ConstraintsCalendar
+              date={currentDate}
+              events={calendarEvents}
+              onEventsChange={handleEventsChange}
+              loading={loading}
+            />
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              type="primary"
+              onClick={handleSave}
+              disabled={!canSave}
+              loading={loading}
+            >
+              Сохранить изменения
+            </Button>
+          </div>
+
+          <div>
+            <Title level={4}>Статистика</Title>
+            <StatsGrid stats={stats ?? null} />
+          </div>
+        </div>
+
+        <UsernameModal
+          visible={!username}
+          onConfirm={handleNameConfirm}
+          onCancel={() => {
+            // держим модалку открытой до ввода имени
+          }}
+        />
+      </section>
+    </div>
   );
 };
 

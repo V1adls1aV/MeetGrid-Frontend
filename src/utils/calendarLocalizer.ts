@@ -1,4 +1,4 @@
-import { dateFnsLocalizer } from "react-big-calendar";
+import { dateFnsLocalizer, Messages } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ru } from "date-fns/locale/ru";
 
@@ -20,5 +20,17 @@ export const calendarLocalizer = dateFnsLocalizer({
   getDay,
   locales,
 });
+
+/**
+ * Common Russian messages for the calendar components.
+ */
+export const calendarMessages: Messages = {
+  today: "Сегодня",
+  previous: "Назад",
+  next: "Вперёд",
+  day: "День",
+  noEventsInRange: "Нет доступных слотов",
+  showMore: (total: number) => `+ ещё ${total}`,
+};
 
 export default calendarLocalizer;

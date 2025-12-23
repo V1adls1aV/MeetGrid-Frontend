@@ -4,12 +4,13 @@
  */
 
 .calendarShell {
-  height: 520px;
+  height: 100%;
+  min-height: 520px;
   --board-radius: 10px;
   --calendar-card-padding: 8px;
   --calendar-card-radius: var(--board-radius);
   --calendar-card-shadow: 0 0 0 rgba(23, 26, 43, 0.12);
-  --calendar-gutter-width: 52px;
+  --calendar-gutter-width: 42px;
   --calendar-column-gap: 6px;
 }
 

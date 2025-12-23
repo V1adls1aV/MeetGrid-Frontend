@@ -2,7 +2,7 @@ export const VOTING_RESOURCES = [
   { id: "stats50", title: "50%" },
   { id: "stats70", title: "70%" },
   { id: "stats90", title: "90%" },
-  { id: "user", title: "Мой выбор" },
+  { id: "user", title: "Ваш выбор" },
 ] as const;
 
 export type VotingResource = (typeof VOTING_RESOURCES)[number];

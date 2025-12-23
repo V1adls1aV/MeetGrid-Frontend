@@ -26,7 +26,7 @@ const findEarliestStatStart = (stats: any) => {
 
 const slotToEvent = (slot: VoteSlot): VotingEvent => ({
   id: slot.id,
-  title: "Моё окно",
+  title: "Ваш выбор",
   start: new Date(slot.start),
   end: new Date(slot.end),
   resourceId: USER_RESOURCE_ID,

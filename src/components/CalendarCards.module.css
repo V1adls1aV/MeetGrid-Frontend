@@ -17,10 +17,23 @@
   border-left: 6px solid var(--calendar-card-border, #000);
   background: var(--calendar-card-fill, #fff);
   color: var(--calendar-card-text, #101828);
-  box-shadow: var(--calendar-card-shadow);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.02);
   display: flex !important;
   flex-direction: column;
   gap: 4px;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.foregroundEvent.foregroundEvent:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 8px 16px rgba(0, 0, 0, 0.04);
+  z-index: 5;
 }
 
 /* Hide default label inside our custom card */

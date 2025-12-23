@@ -9,7 +9,10 @@ import {
   CalendarRenderEvent,
   mapEventsToLayout,
 } from "../utils/calendarLayout";
-import calendarLocalizer from "../utils/calendarLocalizer";
+import {
+  calendarLocalizer,
+  calendarMessages,
+} from "../utils/calendarLocalizer";
 import {
   getBlockedIntervals,
   generateBackgroundEvents,
@@ -38,15 +41,6 @@ import layoutStyles from "./CalendarLayout.module.css";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
-
-const calendarMessages = {
-  today: "Сегодня",
-  previous: "Назад",
-  next: "Вперёд",
-  day: "День",
-  noEventsInRange: "Нет слотов",
-  showMore: (total: number) => `+ ещё ${total}`,
-};
 
 const DnDCalendar = withDragAndDrop<CalendarRenderEvent>(
   Calendar as React.ComponentType<any>,

@@ -24,6 +24,7 @@ export interface TopicStats {
   blocks_90: StatsInterval[];
   blocks_70: StatsInterval[];
   blocks_50: StatsInterval[];
+  vote_count: number;
 }
 
 export interface TopicResponse {
