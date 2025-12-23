@@ -26,7 +26,7 @@ const findEarliestStatStart = (stats: any) => {
 
 const slotToEvent = (slot: VoteSlot): VotingEvent => ({
   id: slot.id,
-  title: "Ваш выбор",
+  title: "Это Вы",
   start: new Date(slot.start),
   end: new Date(slot.end),
   resourceId: USER_RESOURCE_ID,
@@ -48,6 +48,7 @@ export const useTopicVoting = () => {
 
   const initialDateApplied = useRef(false);
   const dataLoadedRef = useRef(false);
+  const topicSyncedRef = useRef(false);
 
   const draftKey = useMemo(
     () =>
@@ -57,6 +58,7 @@ export const useTopicVoting = () => {
 
   useEffect(() => {
     dataLoadedRef.current = false;
+    topicSyncedRef.current = false;
   }, [topicId, username]);
 
   useEffect(() => {
@@ -88,7 +90,13 @@ export const useTopicVoting = () => {
     const slots = intervalsToSlots(intervals);
     setInitialSlots(slots);
 
-    if (!dataLoadedRef.current) {
+    // Apply server data when it becomes available, overriding potential local drafts
+    if (topic && !topicSyncedRef.current) {
+      setUserSlots(slots);
+      topicSyncedRef.current = true;
+      dataLoadedRef.current = true;
+    } else if (!dataLoadedRef.current) {
+      // Logic for initial load when topic is not yet available (waiting for request)
       let draftSlots: VoteSlot[] | null = null;
       if (draftKey) {
         try {
@@ -101,9 +109,6 @@ export const useTopicVoting = () => {
 
       if (draftSlots) {
         setUserSlots(draftSlots);
-        dataLoadedRef.current = true;
-      } else if (topic) {
-        setUserSlots(slots);
         dataLoadedRef.current = true;
       }
     }

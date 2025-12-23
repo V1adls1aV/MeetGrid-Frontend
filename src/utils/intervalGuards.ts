@@ -12,8 +12,8 @@ export const hasOverlap = (events: TimedEvent[], candidate: TimedEvent) =>
   events.some(
     (event) =>
       event.id !== candidate.id &&
-      toMs(event.start) < toMs(candidate.end) &&
-      toMs(event.end) > toMs(candidate.start),
+      toMs(event.start) <= toMs(candidate.end) &&
+      toMs(event.end) >= toMs(candidate.start),
   );
 
 /**

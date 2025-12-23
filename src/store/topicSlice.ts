@@ -5,7 +5,6 @@ import {
   ActionReducerMapBuilder,
 } from "@reduxjs/toolkit";
 import {
-  CreatedTopic,
   TopicCreatePayload,
   TopicResponse,
   VotePayload,

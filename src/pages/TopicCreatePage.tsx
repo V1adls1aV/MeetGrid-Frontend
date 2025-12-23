@@ -76,7 +76,7 @@ const TopicCreatePage: React.FC = () => {
         style={{
           width: "100%",
           maxWidth: "540px",
-          backgroundColor: "#fff",
+          backgroundColor: "#fbfcff",
           borderRadius: "10px",
           boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
           padding: "2rem",
@@ -84,7 +84,10 @@ const TopicCreatePage: React.FC = () => {
       >
         <Typography.Title
           level={2}
-          style={{ textAlign: "center", marginBottom: "1.5rem" }}
+          style={{
+            textAlign: "center",
+            marginBottom: "1.5rem",
+          }}
         >
           Создать опрос
         </Typography.Title>
@@ -100,17 +103,29 @@ const TopicCreatePage: React.FC = () => {
             label="Название"
             rules={[{ required: true, message: "Введите название" }]}
           >
-            <Input size="large" placeholder="Название встречи" />
+            <Input
+              size="large"
+              placeholder="Название встречи"
+              style={{ backgroundColor: "#fbfcff" }}
+            />
           </Form.Item>
           <Form.Item
             name="adminName"
             label="Ваше имя"
             rules={[{ required: true, message: "Введите имя организатора" }]}
           >
-            <Input size="large" placeholder="Например, Владислав" />
+            <Input
+              size="large"
+              placeholder="Например, Владислав"
+              style={{ backgroundColor: "#fbfcff" }}
+            />
           </Form.Item>
           <Form.Item name="description" label="Описание">
-            <Input.TextArea rows={3} placeholder="Цель встречи" />
+            <Input.TextArea
+              rows={3}
+              placeholder="Цель встречи"
+              style={{ backgroundColor: "#fbfcff" }}
+            />
           </Form.Item>
           <Form.Item label="Ограничения">
             <div
@@ -123,7 +138,7 @@ const TopicCreatePage: React.FC = () => {
             >
               <Button
                 onClick={handleOpenConstraints}
-                style={{ borderRadius: "10px" }}
+                style={{ borderRadius: "10px", backgroundColor: "#fbfcff" }}
               >
                 Выбрать ограничения
               </Button>

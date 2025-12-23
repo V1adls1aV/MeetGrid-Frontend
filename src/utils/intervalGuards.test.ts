@@ -1,4 +1,66 @@
-import { isWithinDayLimit, isLongEnough } from "./intervalGuards";
+import { isWithinDayLimit, isLongEnough, hasOverlap } from "./intervalGuards";
+
+describe("hasOverlap", () => {
+  it("detects overlap on borders (start touch)", () => {
+    const existing = [
+      {
+        id: "1",
+        start: new Date(2025, 0, 1, 10, 0),
+        end: new Date(2025, 0, 1, 10, 30),
+      },
+    ];
+    const candidate = {
+      start: new Date(2025, 0, 1, 10, 30),
+      end: new Date(2025, 0, 1, 11, 0),
+    };
+    expect(hasOverlap(existing, candidate)).toBe(true);
+  });
+
+  it("detects overlap on borders (end touch)", () => {
+    const existing = [
+      {
+        id: "1",
+        start: new Date(2025, 0, 1, 10, 30),
+        end: new Date(2025, 0, 1, 11, 0),
+      },
+    ];
+    const candidate = {
+      start: new Date(2025, 0, 1, 10, 0),
+      end: new Date(2025, 0, 1, 10, 30),
+    };
+    expect(hasOverlap(existing, candidate)).toBe(true);
+  });
+
+  it("detects inside overlap", () => {
+    const existing = [
+      {
+        id: "1",
+        start: new Date(2025, 0, 1, 10, 0),
+        end: new Date(2025, 0, 1, 11, 0),
+      },
+    ];
+    const candidate = {
+      start: new Date(2025, 0, 1, 10, 15),
+      end: new Date(2025, 0, 1, 10, 45),
+    };
+    expect(hasOverlap(existing, candidate)).toBe(true);
+  });
+
+  it("allows non-overlapping", () => {
+    const existing = [
+      {
+        id: "1",
+        start: new Date(2025, 0, 1, 10, 0),
+        end: new Date(2025, 0, 1, 10, 30),
+      },
+    ];
+    const candidate = {
+      start: new Date(2025, 0, 1, 11, 0),
+      end: new Date(2025, 0, 1, 11, 30),
+    };
+    expect(hasOverlap(existing, candidate)).toBe(false);
+  });
+});
 
 describe("isWithinDayLimit", () => {
   const createDate = (hours: number, minutes: number) => {

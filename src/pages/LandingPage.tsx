@@ -261,7 +261,11 @@ const LandingPage: React.FC = () => {
         <div style={{ textAlign: "center", padding: "2rem 0" }}>
           <Title level={3}>Готовы спланировать встречу?</Title>
           <Link to="/topic/new">
-            <Button type="primary" size="large" style={{ borderRadius: "10px" }}>
+            <Button
+              type="primary"
+              size="large"
+              style={{ borderRadius: "10px" }}
+            >
               Начать бесплатно
             </Button>
           </Link>

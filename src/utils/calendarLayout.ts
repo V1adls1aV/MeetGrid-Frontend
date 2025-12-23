@@ -37,18 +37,18 @@ const mapResourceId = (
  * Возвращает набор ресурсов для конкретного layout (полный или мобильный).
  */
 export const buildResourceList = (
-  isCompact: boolean,
-): CalendarResourceDescriptor[] =>
-  isCompact ? COMPACT_RESOURCES : DESKTOP_RESOURCES;
+  _isCompact: boolean,
+): CalendarResourceDescriptor[] => DESKTOP_RESOURCES;
 
 /**
- * Приводит события к целевому layout, чтобы React Big Calendar получил корректные resourceId.
+ * Приводит события к целевому layout.
+ * Теперь маппинг 1:1, так как мы используем одни и те же ресурсы и в десктопной, и в мобильной версиях.
  */
 export const mapEventsToLayout = (
   events: VotingEvent[],
-  isCompact: boolean,
+  _isCompact: boolean,
 ): CalendarRenderEvent[] =>
   events.map((event) => ({
     ...event,
-    resourceId: mapResourceId(event.resourceId, isCompact),
+    resourceId: event.resourceId,
   }));
