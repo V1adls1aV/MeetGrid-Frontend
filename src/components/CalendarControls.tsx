@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { Button, DatePicker } from "antd";
 import dayjs, { Dayjs } from "dayjs";
+import useMediaQuery from "../hooks/useMediaQuery";
 
 interface CalendarControlsProps {
   date: Date;
@@ -19,6 +20,7 @@ const CalendarControls: React.FC<CalendarControlsProps> = ({
   onChange,
   availableDates,
 }) => {
+  const isMobile = useMediaQuery("(max-width: 600px)");
   const value = dayjs(date);
 
   const disabledDate = useCallback(
@@ -58,9 +60,13 @@ const CalendarControls: React.FC<CalendarControlsProps> = ({
         placeholder="Дата"
         disabledDate={disabledDate}
       />
-      <Button onClick={() => onChange(shiftDate(date, -1))}>Назад</Button>
-      <Button onClick={goToday}>Сегодня</Button>
-      <Button onClick={() => onChange(shiftDate(date, 1))}>Вперёд</Button>
+      {!isMobile && (
+        <>
+          <Button onClick={() => onChange(shiftDate(date, -1))}>Назад</Button>
+          <Button onClick={goToday}>Сегодня</Button>
+          <Button onClick={() => onChange(shiftDate(date, 1))}>Вперёд</Button>
+        </>
+      )}
     </div>
   );
 };

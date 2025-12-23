@@ -3,7 +3,12 @@ import { Calendar } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import { Spin } from "antd";
 import { useCalendarHandlers } from "../hooks/useCalendarHandlers";
-import { getResourceTheme, CalendarResourceId } from "../theme/calendarTokens";
+import useMediaQuery from "../hooks/useMediaQuery";
+import {
+  getResourceTheme,
+  CalendarResourceId,
+  COMPACT_MEDIA_QUERY,
+} from "../theme/calendarTokens";
 import {
   buildResourceList,
   CalendarRenderEvent,
@@ -65,11 +70,13 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
   constraints = [],
   loading = false,
 }) => {
+  const isCompact = useMediaQuery(COMPACT_MEDIA_QUERY);
+
   const events = useMemo(
     () => [...statsEvents, ...userEvents],
     [statsEvents, userEvents],
   );
-  const isCompact = false;
+
   const layoutResources = useMemo(
     () => buildResourceList(isCompact),
     [isCompact],
@@ -154,7 +161,7 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
       const isTouchingBottom = event.end.getTime() >= dayEnd.getTime();
 
       const style: React.CSSProperties = {
-        backgroundColor: "rgba(120, 120, 120, 0.4)",
+        backgroundColor: "rgba(120, 120, 120, 0.3)",
         border: "none",
         borderRadius: 0,
         pointerEvents: "none",
@@ -177,6 +184,9 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
     const theme = getResourceTheme(event.resourceId as CalendarResourceId);
     const isUserEvent = event.resourceId === USER_RESOURCE_ID;
 
+    // Добавляем класс, специфичный для ресурса, чтобы управлять наложением в CSS
+    const resourceClass = `resource-${event.resourceId}`;
+
     return {
       style: {
         "--calendar-card-border": theme.border,
@@ -187,6 +197,7 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
       className: [
         cardStyles.foregroundEvent,
         isUserEvent ? cardStyles.userCard : cardStyles.statsCard,
+        resourceClass, // Global class for layout overrides
       ].join(" "),
     };
   }, []);

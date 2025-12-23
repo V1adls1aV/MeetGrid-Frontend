@@ -2,25 +2,98 @@
  * Responsive layout and overlay styles.
  */
 
-.desktop {
-  padding-right: 6px;
+.compact {
+  overflow-x: hidden; /* Prevent horizontal scroll from overflowing cards */
 }
 
-.compact :global(.rbc-time-header .rbc-row.rbc-time-header-cell) {
-  display: none;
+.compact :global(.rbc-time-content) {
+  min-width: 0 !important;
 }
 
-.compact :global(.rbc-time-gutter) {
-  width: 40px;
+.compact :global(.rbc-time-header-content) {
+  min-width: 0 !important;
 }
 
-.compact :global(.rbc-day-slot .rbc-event) {
+.compact :global(.rbc-time-column) {
+  min-width: 0 !important;
+}
+
+.compact :global(.rbc-day-slot) {
+  min-width: 0 !important;
+}
+
+.pageContainer {
   width: 100%;
-  margin-left: 0;
+  max-width: 1024px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  height: 100%;
+}
+
+.compactPageContainer {
+  composes: pageContainer;
+  padding: 0.5rem;
+  padding-top: 0.75rem;
+  gap: 0.75rem;
+}
+
+/* Hide header labels text if they are too wide, but keep the structure */
+.compact :global(.rbc-header) {
+  padding: 0 2px;
+  font-size: 0.7rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .compact .foregroundEvent {
-  box-shadow: 0 6px 18px rgba(21, 32, 67, 0.15);
+  box-shadow: 0 2px 8px rgba(21, 32, 67, 0.1);
+}
+
+/*
+  Mobile Overlapping Layout Strategy
+*/
+
+/* Stats 50: Expand right */
+.compact :global(.rbc-event.resource-stats50) {
+  width: 170% !important;
+  z-index: 5 !important;
+}
+
+/* Stats 70: Center and overlap both sides */
+.compact :global(.rbc-event.resource-stats70) {
+  left: -40% !important;
+  width: 180% !important;
+  z-index: 6 !important;
+}
+
+/* Stats 90: Shift left to overlap 70 */
+.compact :global(.rbc-event.resource-stats90) {
+  left: -60% !important;
+  width: 160% !important;
+  z-index: 7 !important;
+}
+
+/* User: Stay on top */
+.compact :global(.rbc-event.resource-user) {
+  z-index: 20 !important;
+}
+
+/* Font size adjustments for mobile */
+.compact :global(.eventTitle) {
+  font-size: 0.75rem;
+  line-height: 1.1;
+}
+
+.compact :global(.eventTime) {
+  font-size: 0.7rem;
+}
+
+.compact :global(.eventMeta) {
+  display: none;
 }
 
 .calendarLoadingOverlay {
@@ -31,5 +104,5 @@
   justify-content: center;
   pointer-events: none;
   z-index: 100;
-  border-radius: var(--board-radius);
+  border-radius: var(--border-radius);
 }

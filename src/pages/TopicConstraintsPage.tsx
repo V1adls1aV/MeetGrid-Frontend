@@ -6,9 +6,12 @@ import { SaveOutlined } from "@ant-design/icons";
 import ConstraintsCalendar, {
   ConstraintEvent,
 } from "../components/ConstraintsCalendar";
+import AnimatedCalendarWrapper from "../components/AnimatedCalendarWrapper";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setDraftConstraints } from "../store/topicSlice";
 import { Interval } from "../types/topic";
+import styles from "../components/CalendarLayout.module.css";
+import useMediaQuery from "../hooks/useMediaQuery";
 const { Title, Paragraph } = Typography;
 
 const eventToInterval = (event: ConstraintEvent): Interval => ({
@@ -24,6 +27,7 @@ const intervalToEvent = (interval: Interval): ConstraintEvent => ({
 });
 
 const TopicConstraintsPage: React.FC = () => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const draftConstraints = useAppSelector(
@@ -57,25 +61,19 @@ const TopicConstraintsPage: React.FC = () => {
       }}
     >
       <section
-        style={{
-          padding: "1.5rem", // slightly reduced padding to match MainPage often having 1.5rem
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-          maxWidth: "768px",
-          width: "100%",
-          position: "relative",
-          height: "100%",
-        }}
+        className={
+          isMobile ? styles.compactPageContainer : styles.pageContainer
+        }
+        style={{ maxWidth: "768px" }}
       >
         <header
           style={{
             flexShrink: 0,
             display: "flex",
-            flexWrap: "wrap",
+            flexWrap: "nowrap",
             justifyContent: "space-between",
             alignItems: "center",
-            gap: "1rem",
+            gap: 0,
             background: "#fff",
             padding: "1rem",
             borderRadius: "12px",
@@ -83,11 +81,14 @@ const TopicConstraintsPage: React.FC = () => {
           }}
         >
           <div>
-            <Title level={2} style={{ marginBottom: "0.25rem" }}>
+            <Title
+              level={2}
+              style={{ marginBottom: "0.25rem", fontSize: "1.5rem" }}
+            >
               Ограничения
             </Title>
             <Paragraph style={{ margin: 0 }} type="secondary">
-              Слот добавляется по выделению; клик по событию удаляет его.
+              Выделяйте отрезки, которые хотите вынести на обсуждение
             </Paragraph>
           </div>
           <DatePicker
@@ -107,11 +108,17 @@ const TopicConstraintsPage: React.FC = () => {
             minHeight: 0,
           }}
         >
-          <ConstraintsCalendar
+          <AnimatedCalendarWrapper
             date={currentDate}
-            events={events}
-            onEventsChange={handleChange}
-          />
+            onDateChange={setCurrentDate}
+            isMobile={isMobile}
+          >
+            <ConstraintsCalendar
+              date={currentDate}
+              events={events}
+              onEventsChange={handleChange}
+            />
+          </AnimatedCalendarWrapper>
         </div>
 
         <FloatButton
@@ -119,8 +126,8 @@ const TopicConstraintsPage: React.FC = () => {
           type="primary"
           style={{
             position: "absolute",
-            right: 38,
-            bottom: 32,
+            right: "2rem",
+            bottom: "2rem",
             width: 56,
             height: 56,
           }}

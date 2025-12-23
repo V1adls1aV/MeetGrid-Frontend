@@ -14,31 +14,31 @@ export interface CalendarResourceTheme {
 const BASE_PALETTE: Record<CalendarResourceId, CalendarResourceTheme> = {
   stats50: {
     border: "#A0A8B8",
-    fill: "#F1F3F7",
+    fill: "rgba(241, 243, 247, 0.5)",
     text: "#30353F",
     accent: "#E4E8F0",
   }, // gray
   stats70: {
     border: "#2577FF",
-    fill: "#E3EEFF",
+    fill: "rgba(227, 238, 255, 0.5)",
     text: "#0E2E73",
     accent: "#C8DBFF",
   }, // blue
   stats90: {
     border: "#1FAD6F",
-    fill: "#DCF6EA",
+    fill: "rgba(220, 246, 234, 0.5)",
     text: "#0A3C26",
     accent: "#C7F0DE",
   }, // green
   user: {
     border: "#F97316",
-    fill: "#FFECDD",
+    fill: "rgba(255, 236, 221, 0.5)",
     text: "#6B2A00",
     accent: "#FFD7B8",
   }, // orange
   others: {
     border: "#7D89FF",
-    fill: "#ECEEFF",
+    fill: "rgba(236, 238, 255, 0.5)",
     text: "#1F2466",
     accent: "#E0E3FF",
   },

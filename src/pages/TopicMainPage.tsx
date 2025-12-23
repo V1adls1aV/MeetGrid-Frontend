@@ -6,9 +6,12 @@ import UsernameModal from "../components/UsernameModal";
 import VotingCalendar from "../components/VotingCalendar";
 import StatsGrid from "../components/StatsGrid";
 import CalendarControls from "../components/CalendarControls";
+import AnimatedCalendarWrapper from "../components/AnimatedCalendarWrapper";
 import { StatsInterval, TopicStats } from "../types/topic";
 import type { VotingEvent } from "../types/calendar";
 import { useTopicVoting } from "../hooks/useTopicVoting";
+import styles from "../components/CalendarLayout.module.css";
+import useMediaQuery from "../hooks/useMediaQuery";
 
 const { Title } = Typography;
 
@@ -61,6 +64,7 @@ const statsToEvents = (stats?: TopicStats): VotingEvent[] => {
 type ViewMode = "calendar" | "stats";
 
 const TopicMainPage: React.FC = () => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const {
     topic,
     stats,
@@ -117,25 +121,18 @@ const TopicMainPage: React.FC = () => {
       }}
     >
       <section
-        style={{
-          width: "100%",
-          maxWidth: "1024px",
-          padding: "1.5rem",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-          position: "relative",
-          height: "100%",
-        }}
+        className={
+          isMobile ? styles.compactPageContainer : styles.pageContainer
+        }
       >
         <header
           style={{
             flexShrink: 0,
             display: "flex",
-            flexWrap: "wrap",
+            flexWrap: "nowrap",
             justifyContent: "space-between",
             alignItems: "center",
-            gap: "1rem",
+            gap: 0,
             background: "#fff",
             padding: "1rem",
             borderRadius: "12px",
@@ -145,12 +142,12 @@ const TopicMainPage: React.FC = () => {
           <div
             style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}
           >
-            <Title level={3} style={{ marginBottom: 0 }}>
+            <Title level={3} style={{ marginBottom: 0, fontSize: "1.5rem" }}>
               {viewMode === "calendar" ? "Выбор времени" : "Статистика"}
             </Title>
             {viewMode === "stats" && stats?.vote_count !== undefined && (
               <Typography.Text type="secondary" style={{ fontSize: "14px" }}>
-                Всего проголосовавших: {stats.vote_count}
+                Всего голосов: {stats.vote_count}
               </Typography.Text>
             )}
           </div>
@@ -165,7 +162,7 @@ const TopicMainPage: React.FC = () => {
               style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
             >
               <span style={{ fontSize: "14px", color: "rgba(0, 0, 0, 0.45)" }}>
-                Мин. длительность:
+                Мин. время:
               </span>
               <TimePicker
                 value={minDuration}
@@ -201,15 +198,21 @@ const TopicMainPage: React.FC = () => {
           }}
         >
           {viewMode === "calendar" ? (
-            <VotingCalendar
+            <AnimatedCalendarWrapper
               date={currentDate}
-              statsEvents={statsEvents}
-              userEvents={userEvents}
-              onUserEventsChange={handleUserEventsChange}
               onDateChange={setCurrentDate}
-              constraints={topic?.constraints ?? []}
-              loading={loading}
-            />
+              isMobile={isMobile}
+            >
+              <VotingCalendar
+                date={currentDate}
+                statsEvents={statsEvents}
+                userEvents={userEvents}
+                onUserEventsChange={handleUserEventsChange}
+                onDateChange={setCurrentDate}
+                constraints={topic?.constraints ?? []}
+                loading={loading}
+              />
+            </AnimatedCalendarWrapper>
           ) : (
             <StatsGrid stats={filteredStats ?? null} />
           )}
@@ -226,8 +229,8 @@ const TopicMainPage: React.FC = () => {
           type="primary"
           style={{
             position: "absolute",
-            right: 38,
-            bottom: 32,
+            right: "2rem",
+            bottom: "2rem",
             width: 56,
             height: 56,
           }}
