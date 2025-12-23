@@ -13,6 +13,18 @@
   --calendar-column-gap: 6px;
 }
 
+.calendarShell :global(.rbc-time-view .rbc-time-slot) {
+  box-sizing: border-box;
+  flex: 0 0 12px;
+  min-height: 12px;
+}
+
+.calendarShell :global(.rbc-time-view .rbc-timeslot-group) {
+  box-sizing: border-box;
+  flex: 0 0 48px;
+  min-height: 48px;
+}
+
 .calendarShell :global(.rbc-time-view) {
   border: none;
   background: #fbfcff;

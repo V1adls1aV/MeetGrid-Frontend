@@ -1,17 +1,28 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Calendar } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
-import { Modal, Spin } from "antd";
+import { Spin } from "antd";
 import calendarLocalizer from "../utils/calendarLocalizer";
+
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
+
 import {
   createEventId,
   ensureDuration,
   normalizeDate,
 } from "../utils/calendarEventHelpers";
 import { hasOverlap, showValidationWarning } from "../utils/intervalGuards";
+import { USER_RESOURCE_ID } from "../constants/votingResources";
+import { getResourceTheme } from "../theme/calendarTokens";
+import VotingCalendarEvent from "./VotingCalendarEvent";
+import EventEditModal from "./EventEditModal";
+import type { VotingEvent } from "../types/calendar";
 
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
+import baseStyles from "./CalendarBase.module.css";
+import gridStyles from "./CalendarGrid.module.css";
+import cardStyles from "./CalendarCards.module.css";
+import layoutStyles from "./CalendarLayout.module.css";
 
 export interface ConstraintEvent {
   id: string;
@@ -59,6 +70,10 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
   onEventsChange,
   loading = false,
 }) => {
+  const [editingEvent, setEditingEvent] = useState<ConstraintEvent | null>(
+    null,
+  );
+
   const scrollToTime = useMemo(() => {
     const anchor = new Date(date);
     anchor.setHours(8, 0, 0, 0);
@@ -138,22 +153,57 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
     [events, updateEvent],
   );
 
-  const handleSelectEvent = useCallback(
-    (event: ConstraintEvent) => {
-      Modal.confirm({
-        title: "Удалить слот?",
-        content: "Слот исчезнет из списка ограничений.",
-        okText: "Удалить",
-        cancelText: "Отмена",
-        onOk: () =>
-          onEventsChange(events.filter((item) => item.id !== event.id)),
-      });
-    },
-    [events, onEventsChange],
+  const handleSelectEvent = useCallback((event: ConstraintEvent) => {
+    setEditingEvent(event);
+  }, []);
+
+  const handleSaveEvent = (id: string, start: Date, end: Date) => {
+    const candidate = { id, start, end };
+    const otherEvents = events.filter((e) => e.id !== id);
+
+    if (hasOverlap(otherEvents, candidate)) {
+      showValidationWarning("Интервал пересекается с существующими окнами.");
+      return;
+    }
+
+    onEventsChange(events.map((e) => (e.id === id ? { ...e, start, end } : e)));
+    setEditingEvent(null);
+  };
+
+  const handleDeleteEvent = (id: string) => {
+    onEventsChange(events.filter((e) => e.id !== id));
+    setEditingEvent(null);
+  };
+
+  const eventPropGetter = useCallback(() => {
+    const theme = getResourceTheme(USER_RESOURCE_ID);
+    return {
+      style: {
+        "--calendar-card-border": theme.border,
+        "--calendar-card-fill": theme.fill,
+        "--calendar-card-text": theme.text,
+        cursor: "move",
+      } as React.CSSProperties,
+      className: [cardStyles.foregroundEvent, cardStyles.userCard].join(" "),
+    };
+  }, []);
+
+  const calendarComponents = useMemo(
+    () => ({ event: VotingCalendarEvent }),
+    [],
   );
 
+  const shellClassName = [
+    baseStyles.calendarShell,
+    gridStyles.calendarShell,
+    cardStyles.calendarShell,
+    layoutStyles.desktop,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div style={{ position: "relative", height: 520 }}>
+    <div className={shellClassName} style={{ position: "relative" }}>
       <DnDCalendar
         culture="ru"
         date={date}
@@ -175,25 +225,22 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
         onSelectEvent={handleSelectEvent}
         draggableAccessor={() => true}
         resizableAccessor={() => true}
+        eventPropGetter={eventPropGetter}
+        components={calendarComponents as any}
         style={{ height: "100%" }}
       />
       {loading && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            pointerEvents: "none",
-            background: "rgba(255, 255, 255, 0.4)",
-            zIndex: 100,
-            borderRadius: "10px",
-          }}
-        >
+        <div className={layoutStyles.calendarLoadingOverlay}>
           <Spin size="large" />
         </div>
       )}
+      <EventEditModal
+        visible={!!editingEvent}
+        event={editingEvent as unknown as VotingEvent}
+        onCancel={() => setEditingEvent(null)}
+        onSave={handleSaveEvent}
+        onDelete={handleDeleteEvent}
+      />
     </div>
   );
 };
