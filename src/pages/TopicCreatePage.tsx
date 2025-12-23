@@ -93,7 +93,7 @@ const TopicCreatePage: React.FC = () => {
             <Button onClick={handleOpenConstraints}>Выбрать ограничения</Button>
             <Text type={draftConstraints.length ? "success" : "secondary"}>
               {draftConstraints.length
-                ? `${draftConstraints.length} слотов выбрано`
+                ? `Слотов выбрано: ${draftConstraints.length}`
                 : "Слоты пока не выбраны"}
             </Text>
           </div>

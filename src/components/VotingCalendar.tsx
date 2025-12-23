@@ -32,6 +32,8 @@ import EventEditModal from "./EventEditModal";
 import {
   hasOverlap,
   fitsConstraints,
+  isWithinDayLimit,
+  isLongEnough,
   showValidationWarning,
 } from "../utils/intervalGuards";
 import baseStyles from "./CalendarBase.module.css";
@@ -117,6 +119,16 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
 
     if (hasOverlap(otherEvents, candidate)) {
       showValidationWarning("Интервал пересекается с существующими слотами.");
+      return;
+    }
+
+    if (!isWithinDayLimit(candidate)) {
+      showValidationWarning("Слот не может заканчиваться позже 23:45.");
+      return;
+    }
+
+    if (!isLongEnough(candidate)) {
+      showValidationWarning("Минимальная длительность слота — 30 минут.");
       return;
     }
 

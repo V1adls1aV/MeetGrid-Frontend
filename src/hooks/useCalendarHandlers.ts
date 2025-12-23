@@ -10,6 +10,8 @@ import {
 import {
   hasOverlap,
   fitsConstraints,
+  isWithinDayLimit,
+  isLongEnough,
   showValidationWarning,
 } from "../utils/intervalGuards";
 import type { VotingEvent } from "../types/calendar";
@@ -43,6 +45,14 @@ export const useCalendarHandlers = ({
         showValidationWarning(
           "Можно выбрать только непересекающиеся интервалы.",
         );
+        return;
+      }
+      if (!isWithinDayLimit(candidate)) {
+        showValidationWarning("Слот не может заканчиваться позже 23:45.");
+        return;
+      }
+      if (!isLongEnough(candidate)) {
+        showValidationWarning("Минимальная длительность слота — 30 минут.");
         return;
       }
       if (!fitsConstraints(candidate, constraints)) {

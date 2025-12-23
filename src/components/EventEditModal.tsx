@@ -102,6 +102,27 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
                   );
                 },
               }),
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value) return Promise.resolve();
+                  
+                  const start = getFieldValue("startTime");
+                  if (start && value.diff(start, "minute") < 30) {
+                    return Promise.reject(
+                      new Error("Минимальная длительность — 30 минут"),
+                    );
+                  }
+
+                  const hours = value.hour();
+                  const minutes = value.minute();
+                  if (hours > 23 || (hours === 23 && minutes > 45)) {
+                    return Promise.reject(
+                      new Error("Слот не может заканчиваться позже 23:45"),
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              }),
             ]}
           >
             <TimePicker format="HH:mm" minuteStep={15} showNow={false} />

@@ -12,7 +12,12 @@ import {
   ensureDuration,
   normalizeDate,
 } from "../utils/calendarEventHelpers";
-import { hasOverlap, showValidationWarning } from "../utils/intervalGuards";
+import {
+  hasOverlap,
+  isWithinDayLimit,
+  isLongEnough,
+  showValidationWarning,
+} from "../utils/intervalGuards";
 import { USER_RESOURCE_ID } from "../constants/votingResources";
 import { getResourceTheme } from "../theme/calendarTokens";
 import VotingCalendarEvent from "./VotingCalendarEvent";
@@ -101,6 +106,16 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
       const end = ensureDuration(start, normalizeDate(slot.end));
       const candidate = { start, end };
 
+      if (!isWithinDayLimit(candidate)) {
+        showValidationWarning("Слот не может заканчиваться позже 23:45.");
+        return;
+      }
+
+      if (!isLongEnough(candidate)) {
+        showValidationWarning("Минимальная длительность слота — 30 минут.");
+        return;
+      }
+
       if (hasOverlap(events, candidate)) {
         showValidationWarning(
           "Можно выбрать только непересекающиеся интервалы.",
@@ -125,6 +140,16 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
     ({ event, start, end }: any) => {
       const candidate = { id: event.id, start, end };
 
+      if (!isWithinDayLimit(candidate)) {
+        showValidationWarning("Слот не может заканчиваться позже 23:45.");
+        return;
+      }
+
+      if (!isLongEnough(candidate)) {
+        showValidationWarning("Минимальная длительность слота — 30 минут.");
+        return;
+      }
+
       if (hasOverlap(events, candidate)) {
         showValidationWarning(
           "Можно выбрать только непересекающиеся интервалы.",
@@ -140,6 +165,16 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
   const handleEventResize = useCallback(
     ({ event, start, end }: any) => {
       const candidate = { id: event.id, start, end };
+
+      if (!isWithinDayLimit(candidate)) {
+        showValidationWarning("Слот не может заканчиваться позже 23:45.");
+        return;
+      }
+
+      if (!isLongEnough(candidate)) {
+        showValidationWarning("Минимальная длительность слота — 30 минут.");
+        return;
+      }
 
       if (hasOverlap(events, candidate)) {
         showValidationWarning(
@@ -160,6 +195,16 @@ const ConstraintsCalendar: React.FC<ConstraintsCalendarProps> = ({
   const handleSaveEvent = (id: string, start: Date, end: Date) => {
     const candidate = { id, start, end };
     const otherEvents = events.filter((e) => e.id !== id);
+
+    if (!isWithinDayLimit(candidate)) {
+      showValidationWarning("Слот не может заканчиваться позже 23:45.");
+      return;
+    }
+
+    if (!isLongEnough(candidate)) {
+      showValidationWarning("Минимальная длительность слота — 30 минут.");
+      return;
+    }
 
     if (hasOverlap(otherEvents, candidate)) {
       showValidationWarning("Интервал пересекается с существующими окнами.");
