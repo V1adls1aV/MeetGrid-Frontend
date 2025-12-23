@@ -6,6 +6,8 @@ import ConstraintsCalendar, {
   ConstraintEvent,
 } from "../components/ConstraintsCalendar";
 import CalendarControls from "../components/CalendarControls";
+import styles from "../components/CalendarLayout.module.css";
+import useMediaQuery from "../hooks/useMediaQuery";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchTopicThunk, updateConstraintsThunk } from "../store/topicSlice";
 import { Interval } from "../types/topic";
@@ -50,6 +52,7 @@ const constraintsEqual = (a: Interval[], b: Interval[]) =>
   );
 
 const TopicAdminPage: React.FC = () => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const { topicId } = useParams<{ topicId: string }>();
   const dispatch = useAppDispatch();
   const { topic, stats, loading, error } = useAppSelector(
@@ -138,21 +141,15 @@ const TopicAdminPage: React.FC = () => {
       }}
     >
       <section
-        style={{
-          width: "100%",
-          maxWidth: "1024px",
-          padding: "1.5rem",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
-          height: "100%",
-        }}
+        className={
+          isMobile ? styles.compactPageContainer : styles.pageContainer
+        }
       >
         <header
           style={{
             flexShrink: 0,
             display: "flex",
-            flexWrap: "wrap",
+            flexWrap: "nowrap",
             justifyContent: "space-between",
             alignItems: "center",
             gap: "1rem",

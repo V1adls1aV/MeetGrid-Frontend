@@ -18,7 +18,7 @@
 
 .calendarShell :global(.rbc-time-content) {
   border: none;
-  border-radius: var(--board-radius);
+  border-radius: var(--border-radius);
   gap: 0;
 }
 

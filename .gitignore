@@ -5,6 +5,7 @@ _.py
 data
 
 node_modules
+storybook-static
 package-lock.json
 
 # Config
