@@ -1,30 +1,12 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { useParams } from "react-router-dom";
-import { Alert, Button, Spin, Typography } from "antd";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchTopicThunk, saveVoteThunk } from "../store/topicSlice";
-import { setUsername } from "../store/userSlice";
+import React, { useMemo } from "react";
+import { Alert, Typography } from "antd";
 import UsernameModal from "../components/UsernameModal";
 import VotingCalendar from "../components/VotingCalendar";
 import StatsLadder from "../components/StatsLadder";
 import CalendarControls from "../components/CalendarControls";
 import { StatsInterval, TopicStats } from "../types/topic";
-import { USER_RESOURCE_ID } from "../constants/votingResources";
 import type { VotingEvent } from "../types/calendar";
-import { useLocalStorage } from "../hooks/useLocalStorage";
-import {
-  VoteSlot,
-  intervalsToSlots,
-  slotsEqual,
-  slotsToIntervals,
-} from "../utils/voteHelpers";
-import { getAvailableDates } from "../utils/calendarEventHelpers";
+import { useTopicVoting } from "../hooks/useTopicVoting";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -73,9 +55,7 @@ const mapBlocks = (label: string, intervals: StatsInterval[]) =>
   }));
 
 const statsToEvents = (stats?: TopicStats): VotingEvent[] => {
-  if (!stats) {
-    return [];
-  }
+  if (!stats) return [];
 
   const build = (
     resourceId: VotingEvent["resourceId"],
@@ -96,15 +76,6 @@ const statsToEvents = (stats?: TopicStats): VotingEvent[] => {
   ];
 };
 
-const slotToEvent = (slot: VoteSlot): VotingEvent => ({
-  id: slot.id,
-  title: "Моё окно",
-  start: new Date(slot.start),
-  end: new Date(slot.end),
-  resourceId: USER_RESOURCE_ID,
-  isEditable: true,
-});
-
 const findEarliestStatStart = (stats?: TopicStats) => {
   if (!stats) {
     return null;
@@ -122,184 +93,30 @@ const findEarliestStatStart = (stats?: TopicStats) => {
 };
 
 const TopicMainPage: React.FC = () => {
-  const { topicId } = useParams<{ topicId: string }>();
-  const dispatch = useAppDispatch();
-  const username = useAppSelector((state) => state.user.username);
-  const { topic, stats, loading, error } = useAppSelector(
-    (state) => state.topic,
-  );
-  const [storedName, setStoredName] = useLocalStorage("meetgrid-username", "");
-  const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [userSlots, setUserSlots] = useState<VoteSlot[]>([]);
-  const [initialSlots, setInitialSlots] = useState<VoteSlot[]>([]);
-  const initialDateApplied = useRef(false);
-  const dataLoadedRef = useRef(false);
-
-  // Draft key based on topic and username
-  const draftKey = useMemo(
-    () =>
-      topicId && username ? `meetgrid-draft-${topicId}-${username}` : null,
-    [topicId, username],
-  );
-
-  // Reset data loaded flag when context changes
-  useEffect(() => {
-    dataLoadedRef.current = false;
-  }, [topicId, username]);
-
-  // Save slots to local draft whenever they change
-  useEffect(() => {
-    if (dataLoadedRef.current && draftKey && userSlots) {
-      localStorage.setItem(draftKey, JSON.stringify(userSlots));
-    }
-  }, [draftKey, userSlots]);
-
-  useEffect(() => {
-    if (storedName && storedName !== username) {
-      dispatch(setUsername(storedName));
-    }
-  }, [dispatch, storedName, username]);
-
-  useEffect(() => {
-    if (topicId && username) {
-      dispatch(fetchTopicThunk({ topicId, username }));
-    }
-  }, [dispatch, topicId, username]);
-
-  useEffect(() => {
-    if (!username) {
-      setUserSlots([]);
-      setInitialSlots([]);
-      return;
-    }
-
-    const intervals = topic?.votes?.[username] ?? [];
-    const slots = intervalsToSlots(intervals);
-
-    // Always update baseline to detect changes against server state
-    setInitialSlots(slots);
-
-    // Only initialize once per session (draft or server)
-    if (!dataLoadedRef.current) {
-      // Try to load draft first
-      let draftSlots: VoteSlot[] | null = null;
-      if (draftKey) {
-        try {
-          const stored = localStorage.getItem(draftKey);
-          if (stored) {
-            draftSlots = JSON.parse(stored);
-          }
-        } catch (e) {
-          console.error("Failed to parse draft", e);
-        }
-      }
-
-      if (draftSlots) {
-        setUserSlots(draftSlots);
-        dataLoadedRef.current = true;
-      } else if (topic) {
-        // Fallback to server data if no draft, but only if topic is loaded
-        setUserSlots(slots);
-        dataLoadedRef.current = true;
-      }
-    }
-  }, [topic?.votes, username, draftKey, topic]);
-
-  useEffect(() => {
-    if (initialDateApplied.current) {
-      return;
-    }
-    const earliest = findEarliestStatStart(stats ?? undefined);
-    if (earliest) {
-      setCurrentDate(earliest);
-      initialDateApplied.current = true;
-    }
-  }, [stats]);
+  const {
+    topic,
+    stats,
+    loading,
+    error,
+    username,
+    currentDate,
+    setCurrentDate,
+    userEvents,
+    availableDates,
+    handleUserEventsChange,
+    handleConfirmName,
+  } = useTopicVoting();
 
   const statsEvents = useMemo(() => statsToEvents(stats ?? undefined), [stats]);
-  const availableDates = useMemo(
-    () => getAvailableDates(topic?.constraints ?? []),
-    [topic?.constraints],
-  );
-  const userEvents = useMemo(() => userSlots.map(slotToEvent), [userSlots]);
+
   const ladderBlocks = useMemo(() => {
-    if (!stats) {
-      return [];
-    }
+    if (!stats) return [];
     return [
       ...mapBlocks("— 90%", stats.blocks_90),
       ...mapBlocks("— 70%", stats.blocks_70),
       ...mapBlocks("— 50%", stats.blocks_50),
     ];
   }, [stats]);
-
-  const handleUserEventsChange = useCallback((nextEvents: VotingEvent[]) => {
-    const sorted = [...nextEvents].sort(
-      (a, b) => a.start.getTime() - b.start.getTime(),
-    );
-    setUserSlots(
-      sorted.map((event) => ({
-        id: event.id,
-        start: event.start.toISOString(),
-        end: event.end.toISOString(),
-      })),
-    );
-  }, []);
-
-  const handleSave = useCallback(() => {
-    if (!topicId || !username) {
-      return;
-    }
-
-    dispatch(
-      saveVoteThunk({
-        topicId,
-        username,
-        payload: { intervals: slotsToIntervals(userSlots) },
-      }),
-    );
-  }, [dispatch, topicId, userSlots, username]);
-
-  const handleConfirm = useCallback(
-    (name: string) => {
-      const trimmed = name.trim();
-      if (!trimmed) {
-        return;
-      }
-
-      setStoredName(trimmed);
-      dispatch(setUsername(trimmed));
-    },
-    [dispatch, setStoredName],
-  );
-
-  const refresh = useCallback(async () => {
-    if (topicId && username) {
-      const action = await dispatch(fetchTopicThunk({ topicId, username }));
-      if (fetchTopicThunk.fulfilled.match(action)) {
-        const intervals = action.payload.topic.votes?.[username] ?? [];
-        setUserSlots(intervalsToSlots(intervals));
-      }
-    }
-  }, [dispatch, topicId, username]);
-
-  const hasChanges = useMemo(
-    () => !slotsEqual(userSlots, initialSlots),
-    [initialSlots, userSlots],
-  );
-
-  // Auto-save effect
-  useEffect(() => {
-    if (!topicId || !username || !hasChanges) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      handleSave();
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [userSlots, hasChanges, topicId, username, handleSave]);
 
   return (
     <section
@@ -360,7 +177,7 @@ const TopicMainPage: React.FC = () => {
 
       <UsernameModal
         visible={!username}
-        onConfirm={handleConfirm}
+        onConfirm={handleConfirmName}
         onCancel={() => {
           // оставляем модалку открытой
         }}

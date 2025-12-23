@@ -1,25 +1,20 @@
 import React, { useCallback, useMemo } from "react";
-import { Calendar, SlotInfo } from "react-big-calendar";
+import { Calendar } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
-import { Modal, Spin } from "antd";
+import { Spin } from "antd";
 import useMediaQuery from "../hooks/useMediaQuery";
-import { COMPACT_MEDIA_QUERY, getResourceTheme } from "../theme/calendarTokens";
+import { useCalendarHandlers } from "../hooks/useCalendarHandlers";
+import {
+  COMPACT_MEDIA_QUERY,
+  getResourceTheme,
+  CalendarResourceId,
+} from "../theme/calendarTokens";
 import {
   buildResourceList,
   CalendarRenderEvent,
   mapEventsToLayout,
 } from "../utils/calendarLayout";
 import calendarLocalizer from "../utils/calendarLocalizer";
-import {
-  createEventId,
-  ensureDuration,
-  normalizeDate,
-} from "../utils/calendarEventHelpers";
-import {
-  hasOverlap,
-  fitsConstraints,
-  showValidationWarning,
-} from "../utils/intervalGuards";
 import {
   getBlockedIntervals,
   generateBackgroundEvents,
@@ -93,10 +88,12 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
     ) as unknown as CalendarRenderEvent[];
   }, [date, constraints, layoutResources]);
 
-  const userTimedEvents = useMemo(
-    () => userEvents.map(({ id, start, end }) => ({ id, start, end })),
-    [userEvents],
-  );
+  const {
+    handleSelectSlot,
+    handleEventDrop,
+    handleEventResize,
+    handleSelectEvent,
+  } = useCalendarHandlers({ userEvents, onUserEventsChange, constraints });
 
   const scrollToTime = useMemo(() => {
     const anchor = new Date(date);
@@ -104,141 +101,11 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
     return anchor;
   }, [date]);
 
-  const updateUserEvent = useCallback(
-    (id: string, patch: Partial<VotingEvent>) => {
-      onUserEventsChange(
-        userEvents.map((event) =>
-          event.id === id ? { ...event, ...patch } : event,
-        ),
-      );
-    },
-    [onUserEventsChange, userEvents],
-  );
-
-  const handleSelectSlot = useCallback(
-    (slot: SlotInfo) => {
-      if (slot.action !== "select" || slot.resourceId !== USER_RESOURCE_ID) {
-        return;
-      }
-
-      const start = normalizeDate(slot.start as Date | string);
-      const end = ensureDuration(
-        start,
-        normalizeDate(slot.end as Date | string),
-      );
-      const candidate = { start, end };
-
-      if (hasOverlap(userTimedEvents, candidate)) {
-        showValidationWarning(
-          "Можно выбрать только непересекающиеся интервалы.",
-        );
-        return;
-      }
-
-      if (!fitsConstraints(candidate, constraints)) {
-        showValidationWarning(
-          "Интервал должен полностью лежать в доступных окнах.",
-        );
-        return;
-      }
-
-      const id = createEventId();
-
-      onUserEventsChange([
-        ...userEvents,
-        {
-          id,
-          title: "Доступен",
-          start,
-          end,
-          resourceId: USER_RESOURCE_ID,
-          isEditable: true,
-        },
-      ]);
-    },
-    [constraints, onUserEventsChange, userEvents, userTimedEvents],
-  );
-
-  const handleEventDrop = useCallback(
-    ({ event, start, end }: any) => {
-      if (event.resourceId !== USER_RESOURCE_ID) {
-        return;
-      }
-
-      const candidate = { id: event.id, start, end };
-
-      if (hasOverlap(userTimedEvents, candidate)) {
-        showValidationWarning(
-          "Можно выбрать только непересекающиеся интервалы.",
-        );
-        return;
-      }
-
-      if (!fitsConstraints(candidate, constraints)) {
-        showValidationWarning(
-          "Интервал должен полностью лежать в доступных окнах.",
-        );
-        return;
-      }
-
-      updateUserEvent(event.id, { start, end });
-    },
-    [constraints, updateUserEvent, userTimedEvents],
-  );
-
-  const handleEventResize = useCallback(
-    ({ event, start, end }: any) => {
-      if (event.resourceId !== USER_RESOURCE_ID) {
-        return;
-      }
-
-      const candidate = { id: event.id, start, end };
-
-      if (hasOverlap(userTimedEvents, candidate)) {
-        showValidationWarning(
-          "Можно выбрать только непересекающиеся интервалы.",
-        );
-        return;
-      }
-
-      if (!fitsConstraints(candidate, constraints)) {
-        showValidationWarning(
-          "Интервал должен полностью лежать в доступных окнах.",
-        );
-        return;
-      }
-
-      updateUserEvent(event.id, { start, end });
-    },
-    [constraints, updateUserEvent, userTimedEvents],
-  );
-
-  const handleSelectEvent = useCallback(
-    (event: any) => {
-      if (event.isBackground) return;
-
-      if (event.resourceId !== USER_RESOURCE_ID) {
-        return;
-      }
-
-      Modal.confirm({
-        title: "Удалить слот?",
-        content: "Он исчезнет из вашего голосования.",
-        okText: "Удалить",
-        cancelText: "Отмена",
-        onOk: () =>
-          onUserEventsChange(userEvents.filter((item) => item.id !== event.id)),
-      });
-    },
-    [onUserEventsChange, userEvents],
-  );
-
   const eventPropGetter = useCallback((event: any) => {
     if (event.isBackground) {
       const position = event.visualPosition as VisualPosition;
       const radius = 10;
 
-      // Ensure that event start/end match day boundaries to avoid rounding at the very top/bottom
       const dayStart = setDayStart(event.start);
       const dayEnd = setDayEnd(event.end);
       const isTouchingTop = event.start.getTime() <= dayStart.getTime();
@@ -251,30 +118,21 @@ const VotingCalendar: React.FC<VotingCalendarProps> = ({
         pointerEvents: "none",
       };
 
-      const topLeft =
-        !isTouchingTop && (position === "start" || position === "single")
-          ? radius
-          : 0;
-      const bottomLeft =
-        !isTouchingBottom && (position === "start" || position === "single")
-          ? radius
-          : 0;
-      const topRight = position === "end" || position === "single" ? radius : 0;
-      const bottomRight =
-        position === "end" || position === "single" ? radius : 0;
+      const hasLeftRound = position === "start" || position === "single";
+      const hasRightRound = position === "end" || position === "single";
 
-      if (topLeft) style.borderTopLeftRadius = topLeft;
-      if (bottomLeft) style.borderBottomLeftRadius = bottomLeft;
-      if (topRight) style.borderTopRightRadius = topRight;
-      if (bottomRight) style.borderBottomRightRadius = bottomRight;
+      if (!isTouchingTop && hasLeftRound) style.borderTopLeftRadius = radius;
+      if (!isTouchingBottom && hasLeftRound)
+        style.borderBottomLeftRadius = radius;
+      if (hasRightRound) {
+        style.borderTopRightRadius = radius;
+        style.borderBottomRightRadius = radius;
+      }
 
-      return {
-        style,
-        className: styles.backgroundEvent,
-      };
+      return { style, className: styles.backgroundEvent };
     }
 
-    const theme = getResourceTheme(event.resourceId);
+    const theme = getResourceTheme(event.resourceId as CalendarResourceId);
     const isUserEvent = event.resourceId === USER_RESOURCE_ID;
 
     return {
