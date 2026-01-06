@@ -5,9 +5,11 @@ import TopicCreatePage from "../pages/TopicCreatePage";
 import TopicConstraintsPage from "../pages/TopicConstraintsPage";
 import TopicMainPage from "../pages/TopicMainPage";
 import TopicAdminPage from "../pages/TopicAdminPage";
+import TelegramEntryPage from "../pages/TelegramEntryPage";
 
 const AppRoutes: React.FC = () => (
   <Routes>
+    <Route path="/tg" element={<TelegramEntryPage />} />
     <Route path="/" element={<LandingPage />} />
     <Route path="/topic/new" element={<TopicCreatePage />} />
     <Route path="/topic/new/constraints" element={<TopicConstraintsPage />} />
